@@ -1,0 +1,28 @@
+name: PR Limit
+
+# Solo PRs apuntando a develop
+on:
+  pull_request_target:
+    branches: [develop]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  check-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce max 3 open PRs contra develop
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo:  context.repo.repo,
+              state: 'open',
+              base: 'develop'
+            });
+            if (prs.length > 3) {
+              core.setFailed(`Solo 3 PRs abiertas contra 'develop'. Actualmente: ${prs.length}`);
+            }
