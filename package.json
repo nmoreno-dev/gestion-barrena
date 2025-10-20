@@ -1,6 +1,6 @@
 {
-  "name": "demo-project",
-  "version": "1.0.0",
+  "name": "gestor-barrena",
+  "version": "0.2.0",
   "private": true,
   "sideEffects": false,
   "type": "module",
