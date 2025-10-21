@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import type { CsvParseStats } from '@/features/dataLoading/hooks/useCsvParser';
+import type { CsvParseStats } from '@/features/deudores/hooks/useCsvParser';
 import Modal, { ModalRef } from '@/common/components/Modal';
 import { Progress } from '@/common/components';
 

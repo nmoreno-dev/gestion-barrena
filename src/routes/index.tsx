@@ -1,6 +1,6 @@
-import { TablaDeudores } from '@/features/dataLoading/components';
-import CsvLoader from '@/features/dataLoading/components/CSVLoader';
-import { Deudor } from '@/features/dataLoading/interfaces/deudor';
+import { TablaDeudores } from '@/features/deudores/components';
+import CsvLoader from '@/features/deudores/components/CSVLoader';
+import { Deudor } from '@/features/deudores/interfaces/deudor';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import {
@@ -8,7 +8,7 @@ import {
   saveDeudoresToStorage,
   clearStoredDeudores,
   formatLoadDate,
-} from '@/features/dataLoading/utils';
+} from '@/features/deudores/utils';
 import { toast } from '@/utils/toast';
 
 export const Route = createFileRoute('/')({
