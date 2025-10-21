@@ -97,11 +97,11 @@ function HomePage() {
   }
 
   return (
-    <div className="container mx-auto space-y-4">
-      <div className="card bg-base-100 shadow-sm">
+    <div className="w-full  space-y-4">
+      <div className="card w-full  bg-base-100 shadow-sm">
         <div className="card-body">
-          <div className="flex justify-between items-center">
-            <h2 className="card-title">Gestión de Deudores</h2>
+          <div className="flex justify-between items-center flex-col md:flex-row">
+            <h2 className="card-title mb-4 md:mb-0 text-2xl">Gestión de Deudores</h2>
             {hasStoredData && (
               <div className="flex flex-col items-end gap-2">
                 <div className="flex items-center gap-4">
@@ -116,7 +116,7 @@ function HomePage() {
                       </div>
                     </div>
                   )}
-                  <button className="btn btn-warning btn" onClick={() => setShowClearModal(true)}>
+                  <button className="btn btn-warning" onClick={() => setShowClearModal(true)}>
                     🗑️ Eliminar Datos
                   </button>
                 </div>
@@ -130,7 +130,6 @@ function HomePage() {
             <div className="alert alert-info">
               <div className="flex justify-between items-center w-full">
                 <div>
-                  <h3 className="font-bold">Datos cargados anteriormente</h3>
                   <div>
                     Tienes {deudores.length} registros cargados del archivo{' '}
                     <strong>{fileName}</strong>. Para cargar un nuevo archivo, primero debes

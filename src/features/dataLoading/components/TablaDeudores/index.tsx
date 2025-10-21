@@ -161,28 +161,6 @@ const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
           <h3 className="text-3xl font-semibold">
             Lista de Deudores ({deudores.length} registros)
           </h3>
-          {deudores.length > 0 && (
-            <div className="stats shadow">
-              <div className="stat">
-                <div className="stat-title">Total Deuda Actual</div>
-                <div className="stat-value text-success">
-                  $
-                  {deudores
-                    .reduce((sum, d) => sum + d.deudaActual, 0)
-                    .toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </div>
-              </div>
-              <div className="stat">
-                <div className="stat-title">Total Cancelatoria</div>
-                <div className="stat-value text-warning">
-                  $
-                  {deudores
-                    .reduce((sum, d) => sum + d.deudaCancelatoria, 0)
-                    .toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                </div>
-              </div>
-            </div>
-          )}
         </div>
         <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
       </div>
