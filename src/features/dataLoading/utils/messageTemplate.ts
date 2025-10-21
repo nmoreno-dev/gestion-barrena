@@ -17,7 +17,7 @@ Puede registrar el pago del saldo de sus cuotas vencidas ingresando a su cuenta 
 
 También puede registrar el pago a través de depósito o transferencia bancaria a la cuenta de la empresa.<br><br>
 
-<u><strong>DATOS BANCARIOS:</strong></u><br>
+<u><strong>DATOS BANCARIOS:</strong></u><br><br>
 BANCO: [ACREEDOR_BANCO]<br>
 EMPRESA: [ACREEDOR_NOMBRE_EMPRESA]<br>
 CUIT: [ACREEDOR_CUIT]<br>
