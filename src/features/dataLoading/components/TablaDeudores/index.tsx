@@ -186,7 +186,9 @@ const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
     <div className="card bg-base-100 shadow-xl">
       <div className="card-body">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Lista de Deudores ({deudores.length} registros)</h3>
+          <h3 className="text-3xl font-semibold">
+            Lista de Deudores ({deudores.length} registros)
+          </h3>
           {deudores.length > 0 && (
             <div className="stats shadow">
               <div className="stat">

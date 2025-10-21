@@ -5,7 +5,7 @@ import type { Deudor } from '../../interfaces/deudor';
 import CsvLoadingModal, { useCsvLoadingModal } from '../CsvLoadingModal';
 
 interface CsvLoaderProps {
-  onDataLoaded: (data: Deudor[]) => void; // callback para devolver los datos parseados
+  onDataLoaded: (data: Deudor[], fileName: string) => void; // callback para devolver los datos parseados
   onStatsUpdate?: (stats: CsvParseStats) => void; // callback opcional para estadísticas de progreso
   onError?: (error: string) => void; // callback opcional para manejo de errores
 }
@@ -44,7 +44,7 @@ const CsvLoader: React.FC<CsvLoaderProps> = ({ onDataLoaded, onStatsUpdate, onEr
         onStatsUpdate?.(progressStats);
       });
 
-      onDataLoaded(result.data);
+      onDataLoaded(result.data, file.name);
       onStatsUpdate?.(result.stats);
 
       if (result.stats.errors.length > 0) {
