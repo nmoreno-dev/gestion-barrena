@@ -6,7 +6,7 @@ export interface Deudor {
   email: string;
   telefono: string;
   acreedor: Acreedor;
-  numeroCredito: number | number[];
+  numeroCredito: number;
   deudaActual: number;
   deudaCancelatoria: number;
 }

@@ -1,7 +1,7 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
-import Modal, { type ModalRef } from '../Modal';
-import Progress from '../Progress';
 import type { CsvParseStats } from '@/features/dataLoading/hooks/useCsvParser';
+import Modal, { ModalRef } from '@/common/components/Modal';
+import { Progress } from '@/common/components';
 
 export interface CsvLoadingModalProps {
   /** Unique identifier for the modal */

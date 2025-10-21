@@ -1,11 +1,5 @@
 import '@/app/index.css';
-import {
-  Outlet,
-  HeadContent,
-  createRootRouteWithContext,
-  Scripts,
-  Link,
-} from '@tanstack/react-router';
+import { Outlet, HeadContent, createRootRouteWithContext, Scripts } from '@tanstack/react-router';
 import { lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 import { IS_DEV, PACKAGE_JSON } from '@/app/constants';
@@ -54,53 +48,13 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body className="h-dvh w-dvw flex">
-        <main className="grow flex flex-col bg-lime-500">
-          <h1 className="text-3xl">App Laoyut</h1>
-          <div role="tablist" className="tabs tabs-border">
-            <Link className="tab" activeProps={{ className: 'tab tab-active' }} role="tab" to="/">
-              Home
-            </Link>
-            <Link
-              className="tab"
-              activeProps={{ className: 'tab tab-active' }}
-              activeOptions={{ exact: true }}
-              role="tab"
-              to="/customers"
-            >
-              Costumers
-            </Link>
-            <Link
-              className="tab"
-              activeProps={{ className: 'tab tab-active' }}
-              role="tab"
-              to="/customers/add-new"
-              params={{ customerId: '1234' }}
-            >
-              Add Costumer
-            </Link>
-            <Link
-              className="tab"
-              activeProps={{ className: 'tab tab-active' }}
-              activeOptions={{ exact: true }}
-              role="tab"
-              to="/customers/$customerId"
-              params={{ customerId: '1234' }}
-            >
-              Costumer 1234 Details
-            </Link>
-            <Link
-              className="tab"
-              activeProps={{ className: 'tab tab-active' }}
-              role="tab"
-              to="/customers/$customerId/edit"
-              params={{ customerId: '1234' }}
-            >
-              Costumer 1234 Edit
-            </Link>
-          </div>
-          <div className="grow p-4 bg-cyan-500">{children}</div>
-          <footer className="flex flex-col items-center bg-yellow-500">
-            <p>Facturillo v{PACKAGE_JSON.version} - Hecho con 💕 por Los Galeses</p>
+        <main className="grow flex flex-col">
+          <h1 className="text-3xl p-4 font-bold">Gestión Selena</h1>
+          <div className="grow p-4">{children}</div>
+          <footer className="flex flex-col items-center">
+            <p className="text-center">
+              Gestión Selena v{PACKAGE_JSON.version} - Hecho con 💕 por Nahuel Moreno
+            </p>
           </footer>
         </main>
         {IS_DEV && (

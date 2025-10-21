@@ -6,6 +6,7 @@ export enum Banco {
 }
 
 export interface Acreedor {
+  nombreCortoBanco: string;
   banco: Banco;
   nombre: string;
   cuit: number | string;
@@ -17,6 +18,7 @@ export interface Acreedor {
 }
 
 const CEFERINO: Acreedor = {
+  nombreCortoBanco: 'BBVA',
   banco: Banco.BBVA,
   nombre: 'CREDIPLAT S.A.',
   cuit: '30-71151720-7',
@@ -26,6 +28,7 @@ const CEFERINO: Acreedor = {
 };
 
 const SAN_JORGE: Acreedor = {
+  nombreCortoBanco: 'INDUSTRIAL',
   banco: Banco.BANCO_INDUSTRIAL,
   nombre: 'ADELANTOS PAY SA.',
   cuit: '30718438906',
@@ -37,6 +40,7 @@ const SAN_JORGE: Acreedor = {
 };
 
 const IXPAY: Acreedor = {
+  nombreCortoBanco: 'SANTANDER',
   banco: Banco.BANCO_SANTANDER,
   nombre: 'EDICIONES TALAR',
   cuit: '30-70912863-5',
@@ -46,6 +50,7 @@ const IXPAY: Acreedor = {
 };
 
 const ONCE_DE_JULIO: Acreedor = {
+  nombreCortoBanco: 'PATAGONIA',
   banco: Banco.PATAGONIA,
   nombre: 'EDUCAX SA.',
   cuit: '30-71810511-7',

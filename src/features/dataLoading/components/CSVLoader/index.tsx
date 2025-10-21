@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FileLoader, CsvLoadingModal, useCsvLoadingModal } from '@/common/components';
+import { FileLoader } from '@/common/components';
 import { useCsvParser, type CsvParseStats } from '../../hooks/useCsvParser';
 import type { Deudor } from '../../interfaces/deudor';
+import CsvLoadingModal, { useCsvLoadingModal } from '../CsvLoadingModal';
 
 interface CsvLoaderProps {
   onDataLoaded: (data: Deudor[]) => void; // callback para devolver los datos parseados
