@@ -258,7 +258,7 @@ export function useCsvParser() {
           delimiter: '', // autodetecta (, ; \t)
           dynamicTyping: false,
           worker: true, // Usar Web Worker para no bloquear la UI
-          chunkSize: 1024 * 1, // 1KB chunks para mejor control de progreso
+          chunkSize: 1024 * 10, // 1KB chunks para mejor control de progreso
           chunk: (results: Papa.ParseResult<string[]>) => {
             if (abortControllerRef.current?.signal.aborted) return;
 

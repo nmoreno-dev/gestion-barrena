@@ -99,14 +99,14 @@ function HomePage() {
   return (
     <div className="w-full  space-y-4">
       <div className="card w-full  bg-base-100 shadow-sm">
-        <div className="card-body">
+        <div className="card-body gap-4">
           <div className="flex justify-between items-center flex-col md:flex-row">
             <h2 className="card-title mb-4 md:mb-0 text-2xl">Gestión de Deudores</h2>
             {hasStoredData && (
               <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 flex-col sm:flex-row">
                   {lastLoadDate && (
-                    <div className="text-gray-500">
+                    <div className="text-gray-500 wrap-anywhere">
                       <div>
                         <strong>Archivo:</strong> {fileName || 'Sin nombre'}
                       </div>
@@ -130,7 +130,7 @@ function HomePage() {
             <div className="alert alert-info">
               <div className="flex justify-between items-center w-full">
                 <div>
-                  <div>
+                  <div className="wrap-anywhere">
                     Tienes {deudores.length} registros cargados del archivo{' '}
                     <strong>{fileName}</strong>. Para cargar un nuevo archivo, primero debes
                     eliminar los datos actuales.

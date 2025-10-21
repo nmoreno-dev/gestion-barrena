@@ -47,7 +47,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <link rel="preload" href="../app/index.css" as="style" />
         <HeadContent />
       </head>
-      <body className="h-dvh w-dvw bg-base-200">
+      <body className="bg-base-200">
         <main className="w-full flex flex-col">
           <h1 className="text-3xl p-4 font-bold bg-base-100">Gestión Selena</h1>
           <div className="w-full p-4">{children}</div>
