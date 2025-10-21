@@ -5,6 +5,27 @@ import {
   createActionColumn,
   type ColumnDef,
 } from '@/common/components/Table/exports';
+import createMessage from '../../utils/messageTemplate';
+import { toast } from '@/utils/toast';
+
+const copyMessageToClipboard = async (deudor: Deudor) => {
+  try {
+    const message = createMessage(deudor);
+    await navigator.clipboard.writeText(message);
+
+    // Show success toast
+    toast.success('Mensaje copiado al portapapeles correctamente', {
+      duration: 3000,
+    });
+  } catch (error) {
+    console.error('Error copying message to clipboard:', error);
+
+    // Show error toast
+    toast.error('Error al copiar el mensaje al portapapeles', {
+      duration: 4000,
+    });
+  }
+};
 
 const columns: ColumnDef<Deudor>[] = [
   createBasicColumn({
@@ -83,16 +104,17 @@ const columns: ColumnDef<Deudor>[] = [
   createActionColumn({
     title: 'Acciones',
     width: 120,
-    render: () => (
+    render: deudor => (
       <div className="flex gap-1">
-        <button className="btn btn-ghost btn-xs" title="Ver detalles">
-          👁️
+        <button className="btn btn-ghost btn-xs text-xl" title="Enviar Mail">
+          📨
         </button>
-        <button className="btn btn-ghost btn-xs" title="Editar">
-          ✏️
-        </button>
-        <button className="btn btn-ghost btn-xs text-error" title="Eliminar">
-          🗑️
+        <button
+          className="btn btn-ghost btn-xs text-xl"
+          title="Copiar Mensaje"
+          onClick={() => copyMessageToClipboard(deudor)}
+        >
+          📄
         </button>
       </div>
     ),

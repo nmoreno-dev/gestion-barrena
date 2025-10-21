@@ -15,6 +15,7 @@ export interface Acreedor {
   CBU: string;
   titular?: string;
   tipoCuenta?: string;
+  web?: string;
 }
 
 const CEFERINO: Acreedor = {
@@ -37,6 +38,7 @@ const SAN_JORGE: Acreedor = {
   CBU: '3220001805050203200010',
   titular: 'ADELANTOS PAY SA.',
   tipoCuenta: 'CUENTA CORRIENTE',
+  web: 'www.adelantos.com.ar',
 };
 
 const IXPAY: Acreedor = {
