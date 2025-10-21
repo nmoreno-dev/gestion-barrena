@@ -42,7 +42,7 @@ const TanStackRouterDevtools = lazy(() =>
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html data-theme="corporate">
+    <html data-theme="dracula">
       <head>
         <link rel="preload" href="../app/index.css" as="style" />
         <HeadContent />
