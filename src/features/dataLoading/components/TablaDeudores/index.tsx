@@ -129,7 +129,7 @@ const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
           )}
         </div>
       </div>
-      <Table<Deudor> columns={columns} data={deudores} />
+      <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
     </div>
   );
 };
