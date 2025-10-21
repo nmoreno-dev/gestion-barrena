@@ -1,12 +1,12 @@
 import { Acreedor } from './acreedor';
 
 export interface Deudor {
-  cuil: number;
+  cuil: string;
   nombre: string;
   email: string;
   telefono: string;
   acreedor: Acreedor;
-  numeroCredito: number;
+  numeroCredito: string;
   deudaActual: number;
   deudaCancelatoria: number;
 }

@@ -169,9 +169,7 @@ export function useCsvParser() {
 
       const deudaActual = parseMonto(rawRow['DEUDA ACTUAL']);
       const deudaCancelatoria = parseMonto(rawRow['DEUDA CANCELATORIA']);
-      const numeroCreditoStr = String(rawRow['N° DE CRÉDITO']).replace(/\D/g, '');
-
-      const numeroCredito = parseInt(numeroCreditoStr, 10);
+      const numeroCredito = String(rawRow['N° DE CRÉDITO']).replace(/\D/g, '');
 
       if (isNaN(deudaActual) || deudaActual <= 0) {
         errors.push({
@@ -191,22 +189,13 @@ export function useCsvParser() {
         });
       }
 
-      if (isNaN(numeroCredito) || numeroCredito <= 0) {
-        errors.push({
-          row: rowIndex,
-          field: 'N° DE CRÉDITO',
-          value: rawRow['N° DE CRÉDITO'],
-          message: 'Número de crédito debe ser un número positivo',
-        });
-      }
-
       if (errors.length > 0) {
         return { data: null, errors };
       }
 
       // Crear objeto Deudor
       const deudor: Deudor = {
-        cuil: parseInt(cuil.replace(/[^\d]/g, ''), 10),
+        cuil: cuil.replace(/[^\d]/g, ''),
         nombre: String(rawRow['TITULAR']).trim(),
         email,
         telefono,

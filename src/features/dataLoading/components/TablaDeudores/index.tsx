@@ -6,7 +6,9 @@ import {
   type ColumnDef,
 } from '@/common/components/Table/exports';
 import { toast } from '@/utils/toast';
+import { copyToClipboard } from '@/utils/clipboard';
 import { createMessage, sendEmail } from '../../utils';
+import formatCuil from '@/utils/cuilFormater';
 
 const copyMessageToClipboard = async (htmlString: string) => {
   try {
@@ -36,12 +38,36 @@ const copyMessageToClipboard = async (htmlString: string) => {
   }
 };
 
+const copyCellValueToClipboard = async (value: string, label: string) => {
+  try {
+    await copyToClipboard(value);
+    toast.success(`${label} copiado al portapapeles: ${value}`, {
+      duration: 2000,
+    });
+  } catch (error) {
+    console.error('Error copying to clipboard:', error);
+    toast.error(`Error al copiar ${label}`, {
+      duration: 3000,
+    });
+  }
+};
+
 const columns: ColumnDef<Deudor>[] = [
   createBasicColumn({
     key: 'cuil',
     title: 'CUIL',
-    width: 120,
-    render: value => value?.toLocaleString('es-AR'),
+    render: value => {
+      const formattedCuil = formatCuil(value as string);
+      return (
+        <span
+          className="underline cursor-pointer hover:text-success"
+          title="Click para copiar CUIL"
+          onClick={() => copyCellValueToClipboard(value as string, 'CUIL')}
+        >
+          {formattedCuil}
+        </span>
+      );
+    },
   }),
   createBasicColumn({
     key: 'nombre',
@@ -86,7 +112,15 @@ const columns: ColumnDef<Deudor>[] = [
     title: 'N° Crédito',
     width: 120,
     align: 'center',
-    render: value => value?.toLocaleString('es-AR'),
+    render: value => (
+      <span
+        className="underline cursor-pointer hover:text-success"
+        title="Click para copiar N° Crédito"
+        onClick={() => copyCellValueToClipboard(value.toString(), 'N° Crédito')}
+      >
+        {value.toString()}
+      </span>
+    ),
   }),
   createBasicColumn({
     key: 'deudaActual',
