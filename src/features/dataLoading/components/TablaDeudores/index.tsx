@@ -155,7 +155,7 @@ const columns: ColumnDef<Deudor>[] = [
 
 const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
   return (
-    <div className="card bg-base-100 shadow-xl">
+    <div className="card bg-base-100 shadow-sm">
       <div className="card-body">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-3xl font-semibold">
@@ -184,8 +184,8 @@ const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
             </div>
           )}
         </div>
+        <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
       </div>
-      <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
     </div>
   );
 };
