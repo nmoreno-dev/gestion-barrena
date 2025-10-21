@@ -115,7 +115,7 @@ const columns: ColumnDef<Deudor>[] = [
     width: 120,
     render: deudor => {
       const bcc = ['micaelarecabarren94@gmail.com'];
-      const subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ${deudor.acreedor.nombre} - TEM`;
+      const subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ADELANTOS.COM - TEM`;
       const message = createMessage(deudor);
       const onSendEmail = () => {
         sendEmail({

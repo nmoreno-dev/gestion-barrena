@@ -6,8 +6,9 @@ export enum Banco {
 }
 
 export interface Acreedor {
+  id: string; // id interno del acreedor
   nombre: string; // nombre del acreedor, ej: 'CREDIPLAT S.A.'
-  nombreEmpresa?: string; // nombre legal de la empresa
+  nombreEmpresa: string; // nombre legal de la empresa
   banco: Banco; // banco del acreedor
   nombreCortoBanco: string; // nombre corto del banco, ej: 'BBVA'
   cuit: number | string; // CUIT del acreedor
@@ -16,11 +17,11 @@ export interface Acreedor {
   CBU: string; // CBU de la cuenta del acreedor
   titular?: string; // titular de la cuenta del acreedor
   tipoCuenta?: string; // tipo de cuenta del acreedor
-  web?: string; // página web del acreedor
 }
 
 const CEFERINO: Acreedor = {
-  nombre: 'CREDIPLAT S.A.',
+  id: 'ceferino',
+  nombre: 'CEFERINO',
   nombreEmpresa: 'CREDIPLAT S.A.',
   banco: Banco.BBVA,
   nombreCortoBanco: 'BBVA',
@@ -31,7 +32,8 @@ const CEFERINO: Acreedor = {
 };
 
 const SAN_JORGE: Acreedor = {
-  nombre: 'ADLENATOS.COM',
+  id: 'sanjorge',
+  nombre: 'SAN JORGE',
   nombreEmpresa: 'ADELANTOS PAY S.A.',
   banco: Banco.BANCO_INDUSTRIAL,
   nombreCortoBanco: 'INDUSTRIAL',
@@ -41,11 +43,11 @@ const SAN_JORGE: Acreedor = {
   CBU: '3220001805050203200010',
   titular: 'ADELANTOS PAY S.A.',
   tipoCuenta: 'CUENTA CORRIENTE',
-  web: 'www.adelantos.com.ar',
 };
 
 const IXPAY: Acreedor = {
-  nombre: 'EDICIONES TALAR',
+  id: 'ixpay',
+  nombre: 'IXPAY',
   nombreEmpresa: 'EDICIONES TALAR',
   banco: Banco.BANCO_SANTANDER,
   nombreCortoBanco: 'SANTANDER',
@@ -56,7 +58,8 @@ const IXPAY: Acreedor = {
 };
 
 const ONCE_DE_JULIO: Acreedor = {
-  nombre: 'EDUCAX S.A.',
+  id: '11dejulio',
+  nombre: 'ONCE DE JULIO',
   nombreEmpresa: 'EDUCAX S.A.',
   banco: Banco.PATAGONIA,
   nombreCortoBanco: 'PATAGONIA',

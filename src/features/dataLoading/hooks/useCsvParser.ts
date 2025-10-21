@@ -86,23 +86,23 @@ export function useCsvParser() {
     return cleanPhone.length >= 8;
   };
 
-  const findAcreedor = (colocadorName: string) => {
-    const normalizedName = colocadorName.toUpperCase().trim();
+  const findAcreedor = (colocadorId: string) => {
+    const normalizedName = colocadorId.toUpperCase().trim();
 
-    // Mapeo específico para los nombres comunes en los datos
-    if (normalizedName.includes('SANJORGE') || normalizedName === 'SANJORGE') {
-      return ACREEDORES.find(a => a.nombre === 'ADELANTOS PAY SA.') || ACREEDORES[1]; // SAN_JORGE
-    }
+    // // Mapeo específico para los nombres comunes en los datos
+    // if (normalizedName.includes('SANJORGE') || normalizedName === 'SANJORGE') {
+    //   return ACREEDORES.find(a => a.nombre === 'ADELANTOS PAY SA.') || ACREEDORES[1]; // SAN_JORGE
+    // }
 
-    if (normalizedName.includes('CEFERINO') || normalizedName === 'CEFERINO') {
-      return ACREEDORES.find(a => a.nombre === 'CREDIPLAT S.A.') || ACREEDORES[0]; // CEFERINO
-    }
+    // if (normalizedName.includes('CEFERINO') || normalizedName === 'CEFERINO') {
+    //   return ACREEDORES.find(a => a.nombre === 'CREDIPLAT S.A.') || ACREEDORES[0]; // CEFERINO
+    // }
 
     // Búsqueda general por nombre
     const foundAcreedor = ACREEDORES.find(
       acreedor =>
-        acreedor.nombre.toUpperCase().includes(normalizedName) ||
-        normalizedName.includes(acreedor.nombre.toUpperCase()),
+        acreedor.id.toUpperCase().includes(normalizedName) ||
+        normalizedName.includes(acreedor.id.toUpperCase()),
     );
 
     return foundAcreedor || ACREEDORES[0]; // Default al primero si no encuentra

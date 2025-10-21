@@ -2,7 +2,7 @@ import { Deudor } from '../interfaces/deudor';
 
 const TEMPLATE = `Buen Día, <strong>[DEUDOR_NOMBRE], CUIL/CUIT: [DEUDOR_CUIL]</strong>.<br><br>
 
-Nos comunicamos desde <em>Estudio Jurídico Barrena</em>. Informamos que la empresa <strong>[ACREEDOR_NOMBRE]</strong> reclama saldos vencidos por su préstamo N° <strong>[NUMERO_CREDITO]</strong>.<br><br>
+Nos comunicamos desde <em>Estudio Jurídico Barrena</em>. Informamos que la empresa <strong>ADELANTOS.COM</strong> reclama saldos vencidos por su préstamo N° <strong>[NUMERO_CREDITO]</strong>.<br><br>
 
 Usted tiene cuotas pendientes de pago por un total de <strong>[DEUDA_ACTUAL]</strong>.<br><br>
 
@@ -12,13 +12,13 @@ Plazo para registrar el pago <strong>[PLAZO_VENCIMIENTO]</strong>.<br><br>
 
 <em><strong>Le recomendamos regularizar a la brevedad para evitar que siga sumando intereses por atraso de pago.</strong></em> ❗⚠️<br><br>
 
-[ACREEDOR_WEB]
+Puede registrar el pago del saldo de sus cuotas vencidas ingresando a su cuenta en nuestra página web: <strong><a href="www.adelantos.com.ar">www.adelantos.com.ar</a></strong><br><br>
 
 También puede registrar el pago a través de depósito o transferencia bancaria a la cuenta de la empresa.<br><br>
 
 <u><strong>DATOS BANCARIOS:</strong></u><br>
 BANCO: [ACREEDOR_BANCO]<br>
-EMPRESA: [ACREEDOR_NOMBRE]<br>
+EMPRESA: [ACREEDOR_NOMBRE_EMPRESA]<br>
 CUIT: [ACREEDOR_CUIT]<br>
 N° CUENTA: [ACREEDOR_CUENTA]<br>
 <strong>CBU: [ACREEDOR_CBU]</strong><br>
@@ -56,17 +56,11 @@ export default function createMessage(deudor: Deudor) {
     )
     .replaceAll('[PLAZO_VENCIMIENTO]', new Date(Date.now() + 86400000).toLocaleDateString('es-AR'))
     .replaceAll('[ACREEDOR_BANCO]', deudor.acreedor.banco)
-    .replaceAll('[ACREEDOR_NOMBRE]', deudor.acreedor.nombre)
+    .replaceAll('[ACREEDOR_NOMBRE_EMPRESA]', deudor.acreedor.nombreEmpresa)
     .replaceAll('[ACREEDOR_CUIT]', deudor.acreedor.cuit.toString())
     .replaceAll('[ACREEDOR_CUENTA]', deudor.acreedor.numeroCuenta.toString())
     .replaceAll('[ACREEDOR_ALIAS]', deudor.acreedor.alias)
     .replaceAll('[ACREEDOR_CBU]', deudor.acreedor.CBU.toString())
-    .replaceAll(
-      '[ACREEDOR_WEB]',
-      deudor.acreedor.web
-        ? `Puede registrar el pago del saldo de sus cuotas vencidas ingresando a su cuenta en nuestra página web: <strong><a href="${deudor.acreedor.web}">${deudor.acreedor.web}</a></strong><br><br>`
-        : '',
-    )
     .replaceAll(
       '[ACREEDOR_TIPO_CUENTA]',
       deudor.acreedor.tipoCuenta ? `TIPO DE CUENTA: ${deudor.acreedor.tipoCuenta}<br><br>` : '',
