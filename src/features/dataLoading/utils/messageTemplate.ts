@@ -1,3 +1,4 @@
+import formatCuil from '@/utils/cuilFormater';
 import { Deudor } from '../interfaces/deudor';
 
 const TEMPLATE = `Buen Día, <strong>[DEUDOR_NOMBRE], CUIL: [DEUDOR_CUIL]</strong>.<br><br>
@@ -30,11 +31,11 @@ ALIAS: [ACREEDOR_ALIAS]<br>
 Esperamos su respuesta.<br><br>
 
 Muchas Gracias.<br><br>
-` as const;
+Saludos.` as const;
 
 export default function createMessage(deudor: Deudor) {
   return TEMPLATE.replaceAll('[DEUDOR_NOMBRE]', deudor.nombre)
-    .replaceAll('[DEUDOR_CUIL]', deudor.cuil.toString())
+    .replaceAll('[DEUDOR_CUIL]', formatCuil(deudor.cuil))
     .replaceAll('[NUMERO_CREDITO]', deudor.numeroCredito.toString())
     .replaceAll(
       '[DEUDA_ACTUAL]',
@@ -63,6 +64,6 @@ export default function createMessage(deudor: Deudor) {
     .replaceAll('[ACREEDOR_CBU]', deudor.acreedor.CBU.toString())
     .replaceAll(
       '[ACREEDOR_TIPO_CUENTA]',
-      deudor.acreedor.tipoCuenta ? `TIPO DE CUENTA: ${deudor.acreedor.tipoCuenta}<br><br>` : '',
+      deudor.acreedor.tipoCuenta ? `TIPO DE CUENTA: ${deudor.acreedor.tipoCuenta}<br><br>` : '<br>',
     );
 }
