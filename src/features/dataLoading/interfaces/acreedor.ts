@@ -1,27 +1,29 @@
 export enum Banco {
   BBVA = 'BANCO FRANCES - BBVA',
-  BANCO_INDUSTRIAL = 'BANCO INDUSTRIAL SA',
+  BANCO_INDUSTRIAL = 'BANCO INDUSTRIAL S.A.',
   BANCO_SANTANDER = 'SANTANDER',
   PATAGONIA = 'PATAGONIA',
 }
 
 export interface Acreedor {
-  nombreCortoBanco: string;
-  banco: Banco;
-  nombre: string;
-  cuit: number | string;
-  numeroCuenta: string;
-  alias: string;
-  CBU: string;
-  titular?: string;
-  tipoCuenta?: string;
-  web?: string;
+  nombre: string; // nombre del acreedor, ej: 'CREDIPLAT S.A.'
+  nombreEmpresa?: string; // nombre legal de la empresa
+  banco: Banco; // banco del acreedor
+  nombreCortoBanco: string; // nombre corto del banco, ej: 'BBVA'
+  cuit: number | string; // CUIT del acreedor
+  numeroCuenta: string; // número de cuenta del acreedor
+  alias: string; // alias de la cuenta del acreedor
+  CBU: string; // CBU de la cuenta del acreedor
+  titular?: string; // titular de la cuenta del acreedor
+  tipoCuenta?: string; // tipo de cuenta del acreedor
+  web?: string; // página web del acreedor
 }
 
 const CEFERINO: Acreedor = {
-  nombreCortoBanco: 'BBVA',
-  banco: Banco.BBVA,
   nombre: 'CREDIPLAT S.A.',
+  nombreEmpresa: 'CREDIPLAT S.A.',
+  banco: Banco.BBVA,
+  nombreCortoBanco: 'BBVA',
   cuit: '30-71151720-7',
   numeroCuenta: '2000003038200',
   alias: 'FRANCESCREDIPLAT',
@@ -29,22 +31,24 @@ const CEFERINO: Acreedor = {
 };
 
 const SAN_JORGE: Acreedor = {
-  nombreCortoBanco: 'INDUSTRIAL',
+  nombre: 'ADLENATOS.COM',
+  nombreEmpresa: 'ADELANTOS PAY S.A.',
   banco: Banco.BANCO_INDUSTRIAL,
-  nombre: 'ADELANTOS PAY SA.',
+  nombreCortoBanco: 'INDUSTRIAL',
   cuit: '30718438906',
   numeroCuenta: '1-5020320/1',
   alias: 'ADELANTOSPAY',
   CBU: '3220001805050203200010',
-  titular: 'ADELANTOS PAY SA.',
+  titular: 'ADELANTOS PAY S.A.',
   tipoCuenta: 'CUENTA CORRIENTE',
   web: 'www.adelantos.com.ar',
 };
 
 const IXPAY: Acreedor = {
-  nombreCortoBanco: 'SANTANDER',
-  banco: Banco.BANCO_SANTANDER,
   nombre: 'EDICIONES TALAR',
+  nombreEmpresa: 'EDICIONES TALAR',
+  banco: Banco.BANCO_SANTANDER,
+  nombreCortoBanco: 'SANTANDER',
   cuit: '30-70912863-5',
   numeroCuenta: '429-016358/3',
   alias: 'TRAPO.CLARIN.BATA',
@@ -52,9 +56,10 @@ const IXPAY: Acreedor = {
 };
 
 const ONCE_DE_JULIO: Acreedor = {
-  nombreCortoBanco: 'PATAGONIA',
+  nombre: 'EDUCAX S.A.',
+  nombreEmpresa: 'EDUCAX S.A.',
   banco: Banco.PATAGONIA,
-  nombre: 'EDUCAX SA.',
+  nombreCortoBanco: 'PATAGONIA',
   cuit: '30-71810511-7',
   numeroCuenta: '010-100766315-000',
   alias: 'CALCULAR.SUMAN.ABACO',

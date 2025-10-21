@@ -5,22 +5,31 @@ import {
   createActionColumn,
   type ColumnDef,
 } from '@/common/components/Table/exports';
-import createMessage from '../../utils/messageTemplate';
 import { toast } from '@/utils/toast';
+import { createMessage, sendEmail } from '../../utils';
 
-const copyMessageToClipboard = async (deudor: Deudor) => {
+const copyMessageToClipboard = async (htmlString: string) => {
   try {
-    const message = createMessage(deudor);
-    await navigator.clipboard.writeText(message);
+    if (navigator.clipboard && window.ClipboardItem) {
+      // Copia el HTML con formato (Gmail lo renderiza correctamente)
+      const blobInput = new Blob([htmlString], { type: 'text/html' });
+      const clipboardItem = new ClipboardItem({
+        'text/html': blobInput,
+        'text/plain': new Blob([htmlString.replace(/<[^>]+>/g, '')], {
+          type: 'text/plain',
+        }),
+      });
+      await navigator.clipboard.write([clipboardItem]);
+    } else {
+      // Fallback: copia texto plano si ClipboardItem no está soportado
+      await navigator.clipboard.writeText(htmlString);
+    }
 
-    // Show success toast
     toast.success('Mensaje copiado al portapapeles correctamente', {
       duration: 3000,
     });
   } catch (error) {
     console.error('Error copying message to clipboard:', error);
-
-    // Show error toast
     toast.error('Error al copiar el mensaje al portapapeles', {
       duration: 4000,
     });
@@ -104,20 +113,37 @@ const columns: ColumnDef<Deudor>[] = [
   createActionColumn({
     title: 'Acciones',
     width: 120,
-    render: deudor => (
-      <div className="flex gap-1">
-        <button className="btn btn-ghost btn-xs text-xl" title="Enviar Mail">
-          📨
-        </button>
-        <button
-          className="btn btn-ghost btn-xs text-xl"
-          title="Copiar Mensaje"
-          onClick={() => copyMessageToClipboard(deudor)}
-        >
-          📄
-        </button>
-      </div>
-    ),
+    render: deudor => {
+      const bcc = ['micaelarecabarren94@gmail.com'];
+      const subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ${deudor.acreedor.nombre} - TEM`;
+      const message = createMessage(deudor);
+      const onSendEmail = () => {
+        sendEmail({
+          to: [deudor.email],
+          bcc,
+          subject,
+        });
+      };
+
+      return (
+        <div className="flex gap-1">
+          <button
+            className="btn btn-ghost btn-xs text-xl"
+            title="Enviar Mail"
+            onClick={onSendEmail}
+          >
+            📨
+          </button>
+          <button
+            className="btn btn-ghost btn-xs text-xl"
+            title="Copiar Mensaje"
+            onClick={() => copyMessageToClipboard(message)}
+          >
+            📄
+          </button>
+        </div>
+      );
+    },
   }),
 ];
 
