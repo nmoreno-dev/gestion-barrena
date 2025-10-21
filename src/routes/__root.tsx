@@ -42,14 +42,14 @@ const TanStackRouterDevtools = lazy(() =>
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <html>
+    <html data-theme="corporate">
       <head>
         <link rel="preload" href="../app/index.css" as="style" />
         <HeadContent />
       </head>
-      <body className="h-dvh w-dvw flex">
+      <body className="h-dvh w-dvw flex bg-base-200">
         <main className="grow flex flex-col">
-          <h1 className="text-3xl p-4 font-bold">Gestión Selena</h1>
+          <h1 className="text-3xl p-4 font-bold bg-base-100">Gestión Selena</h1>
           <div className="grow p-4">{children}</div>
           <footer className="flex flex-col items-center">
             <p className="text-center">

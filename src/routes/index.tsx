@@ -97,8 +97,8 @@ function HomePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="card bg-base-100 shadow-xl">
+    <div className="container mx-auto space-y-4">
+      <div className="card bg-base-100 shadow-sm">
         <div className="card-body">
           <div className="flex justify-between items-center">
             <h2 className="card-title">Gestión de Deudores</h2>
