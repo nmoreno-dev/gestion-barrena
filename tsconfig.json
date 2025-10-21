@@ -14,12 +14,11 @@
     "target": "es2022",
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "@/app/*": ["./src/app/*"],
       "@/features/*": ["./src/features/*"],
-      "@/shared/*": ["./src/shared/*"],
-      "@/utils": ["./src/uitls"],
+      "@/common/*": ["./src/common/*"],
+      "@/utils/*": ["./src/utils/*"],
       "@/*": ["./*"]
     },
     "noEmit": true
