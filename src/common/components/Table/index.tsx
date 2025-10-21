@@ -25,6 +25,8 @@ export interface TableProps<TData> {
   enablePagination?: boolean;
   enableRowSelection?: boolean;
   enableColumnPinning?: boolean;
+  // Pagination options
+  paginationSize?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   // Row styling
   highlightOnHover?: boolean;
   // Initial state
@@ -53,6 +55,7 @@ function Table<TData>({
   enablePagination = false,
   enableRowSelection = false,
   enableColumnPinning = false,
+  paginationSize = 'sm',
   highlightOnHover = true,
   initialSorting = [],
   initialFilters = [],
@@ -203,9 +206,55 @@ function Table<TData>({
   const renderPagination = () => {
     if (!enablePagination) return null;
 
+    const currentPage = table.getState().pagination.pageIndex + 1;
+    const totalPages = table.getPageCount();
+    const canPreviousPage = table.getCanPreviousPage();
+    const canNextPage = table.getCanNextPage();
+
+    // Generate page numbers to show (max 7 buttons including ellipsis)
+    const generatePageNumbers = () => {
+      const pages = [];
+      const delta = 2; // Number of pages to show around current page
+
+      if (totalPages <= 7) {
+        // Show all pages if total is 7 or less
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Always show first page
+        pages.push(1);
+
+        if (currentPage > delta + 2) {
+          pages.push('...');
+        }
+
+        // Show pages around current page
+        const start = Math.max(2, currentPage - delta);
+        const end = Math.min(totalPages - 1, currentPage + delta);
+
+        for (let i = start; i <= end; i++) {
+          pages.push(i);
+        }
+
+        if (currentPage < totalPages - delta - 1) {
+          pages.push('...');
+        }
+
+        // Always show last page if there's more than one page
+        if (totalPages > 1) {
+          pages.push(totalPages);
+        }
+      }
+
+      return pages;
+    };
+
+    const pageNumbers = generatePageNumbers();
+
     return (
-      <div className="flex items-center justify-between px-4 py-3 bg-base-100 border-t border-base-content/10">
-        <div className="flex items-center gap-2 text-sm text-base-content/60">
+      <div className="flex flex-col sm:flex-row items-center justify-between p-4 bg-base-100 border-t border-base-content/10">
+        <div className="flex items-center text-sm text-base-content/60">
           <span>
             Mostrando{' '}
             {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} a{' '}
@@ -216,51 +265,105 @@ function Table<TData>({
             de {table.getPrePaginationRowModel().rows.length} resultados
           </span>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          {/* Page size selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-base-content/60 lg:text-nowrap">Filas por página:</span>
+            <select
+              className={classNames('select select-bordered', `select-${paginationSize}`)}
+              value={table.getState().pagination.pageSize}
+              onChange={e => table.setPageSize(Number(e.target.value))}
+            >
+              {[10, 20, 30, 40, 50].map(pageSize => (
+                <option key={pageSize} value={pageSize}>
+                  {pageSize}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Pagination controls */}
           <div className="join">
+            {/* First page button */}
             <button
-              className="join-item btn btn-sm"
+              className={classNames('join-item btn', `btn-${paginationSize}`, {
+                'btn-disabled': !canPreviousPage,
+              })}
               onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
+              disabled={!canPreviousPage}
+              title="Primera página"
             >
               «
             </button>
+
+            {/* Previous page button */}
             <button
-              className="join-item btn btn-sm"
+              className={classNames('join-item btn', `btn-${paginationSize}`, {
+                'btn-disabled': !canPreviousPage,
+              })}
               onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+              disabled={!canPreviousPage}
+              title="Página anterior"
             >
               ‹
             </button>
-            <span className="join-item btn btn-sm btn-disabled">
-              Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}
-            </span>
+
+            {/* Page number buttons */}
+            {pageNumbers.map((page, index) => {
+              if (page === '...') {
+                return (
+                  <button
+                    key={`ellipsis-${index}`}
+                    className={classNames('join-item btn', `btn-${paginationSize}`, 'btn-disabled')}
+                    disabled
+                  >
+                    ...
+                  </button>
+                );
+              }
+
+              const pageNumber = page as number;
+              const isActive = pageNumber === currentPage;
+
+              return (
+                <button
+                  key={pageNumber}
+                  className={classNames('join-item btn', `btn-${paginationSize}`, {
+                    'btn-active': isActive,
+                  })}
+                  onClick={() => table.setPageIndex(pageNumber - 1)}
+                  title={`Página ${pageNumber}`}
+                >
+                  {pageNumber}
+                </button>
+              );
+            })}
+
+            {/* Next page button */}
             <button
-              className="join-item btn btn-sm"
+              className={classNames('join-item btn', `btn-${paginationSize}`, {
+                'btn-disabled': !canNextPage,
+              })}
               onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
+              disabled={!canNextPage}
+              title="Página siguiente"
             >
               ›
             </button>
+
+            {/* Last page button */}
             <button
-              className="join-item btn btn-sm"
+              className={classNames('join-item btn', `btn-${paginationSize}`, {
+                'btn-disabled': !canNextPage,
+              })}
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
+              disabled={!canNextPage}
+              title="Última página"
             >
               »
             </button>
           </div>
-          <select
-            className="select select-sm select-bordered"
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-          >
-            {[10, 20, 30, 40, 50].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize} filas
-              </option>
-            ))}
-          </select>
         </div>
       </div>
     );

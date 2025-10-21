@@ -91,6 +91,7 @@ function MyComponent() {
 | `enableSorting`       | `boolean`                              | `true`                       | Habilitar ordenamiento               |
 | `enableFiltering`     | `boolean`                              | `false`                      | Habilitar filtrado                   |
 | `enablePagination`    | `boolean`                              | `false`                      | Habilitar paginación                 |
+| `paginationSize`      | `'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl'` | `'sm'`                       | Tamaño de los botones de paginación  |
 | `enableRowSelection`  | `boolean`                              | `false`                      | Habilitar selección de filas         |
 | `enableColumnPinning` | `boolean`                              | `false`                      | Habilitar columnas fijas             |
 | `highlightOnHover`    | `boolean`                              | `true`                       | Resaltar fila al pasar el mouse      |
