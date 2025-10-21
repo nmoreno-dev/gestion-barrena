@@ -6,7 +6,7 @@ Nos comunicamos desde <em>Estudio Jurídico Barrena</em>. Informamos que la empr
 
 Usted tiene cuotas pendientes de pago por un total de <strong>[DEUDA_ACTUAL]</strong>.<br><br>
 
-Si desea cancelar debe abonar un total de <stron_>[DEUDA CANCELATORIA]</stron_>.<br><br>
+Si desea cancelar debe abonar un total de <strong>[DEUDA_CANCELATORIA]</strong>.<br><br>
 
 Plazo para registrar el pago <strong>[PLAZO_VENCIMIENTO]</strong>.<br><br>
 
