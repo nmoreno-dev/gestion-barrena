@@ -1,6 +1,6 @@
 import { Deudor } from '../interfaces/deudor';
 
-const TEMPLATE = `Buen Día, <strong>[DEUDOR_NOMBRE], CUIL/CUIT: [DEUDOR_CUIL]</strong>.<br><br>
+const TEMPLATE = `Buen Día, <strong>[DEUDOR_NOMBRE], CUIL: [DEUDOR_CUIL]</strong>.<br><br>
 
 Nos comunicamos desde <em>Estudio Jurídico Barrena</em>. Informamos que la empresa <strong>ADELANTOS.COM</strong> reclama saldos vencidos por su préstamo N° <strong>[NUMERO_CREDITO]</strong>.<br><br>
 
