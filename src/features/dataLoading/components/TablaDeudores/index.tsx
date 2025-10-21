@@ -12,19 +12,22 @@ import formatCuil from '@/utils/cuilFormater';
 
 const copyMessageToClipboard = async (htmlString: string) => {
   try {
+    // Limpiamos espacios en blanco al principio y final
+    const cleanHtmlString = htmlString.trim();
+
     if (navigator.clipboard && window.ClipboardItem) {
       // Copia el HTML con formato (Gmail lo renderiza correctamente)
-      const blobInput = new Blob([htmlString], { type: 'text/html' });
+      const blobInput = new Blob([cleanHtmlString], { type: 'text/html' });
       const clipboardItem = new ClipboardItem({
         'text/html': blobInput,
-        'text/plain': new Blob([htmlString.replace(/<[^>]+>/g, '')], {
+        'text/plain': new Blob([cleanHtmlString.replace(/<[^>]+>/g, '')], {
           type: 'text/plain',
         }),
       });
       await navigator.clipboard.write([clipboardItem]);
     } else {
       // Fallback: copia texto plano si ClipboardItem no está soportado
-      await navigator.clipboard.writeText(htmlString);
+      await navigator.clipboard.writeText(cleanHtmlString);
     }
 
     toast.success('Mensaje copiado al portapapeles correctamente', {
