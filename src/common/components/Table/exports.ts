@@ -1,6 +1,5 @@
 // Exportaciones principales
 export { default as Table, type TableProps } from './index';
-export { TableExample } from './example';
 
 // Exportaciones de tipos y utilidades
 export type {
