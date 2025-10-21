@@ -3,6 +3,7 @@ import { Outlet, HeadContent, createRootRouteWithContext, Scripts } from '@tanst
 import { lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 import { IS_DEV, PACKAGE_JSON } from '@/app/constants';
+import { Layout } from '@/common/components';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -27,7 +28,9 @@ export const Route = createRootRouteWithContext<{
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <Layout>
+        <Outlet />
+      </Layout>
     </RootDocument>
   );
 }
@@ -48,15 +51,14 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
         <HeadContent />
       </head>
       <body className="bg-base-200">
-        <main className="w-full flex flex-col">
-          <h1 className="text-3xl p-4 font-bold bg-base-100">Gestión Selena</h1>
-          <div className="w-full p-4">{children}</div>
-          <footer className="flex flex-col items-center">
-            <p className="text-center">
+        <div className="min-h-screen flex flex-col">
+          {children}
+          <footer className="mt-auto p-4 text-center bg-base-100 border-t border-base-300">
+            <p className="text-sm text-base-content/60">
               Gestión Selena v{PACKAGE_JSON.version} - Hecho con 💕 por Nahuel Moreno
             </p>
           </footer>
-        </main>
+        </div>
         {IS_DEV && (
           <Suspense fallback={null}>
             <TanStackRouterDevtools position="bottom-right" />
