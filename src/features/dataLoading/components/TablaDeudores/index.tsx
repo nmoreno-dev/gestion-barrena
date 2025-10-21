@@ -74,34 +74,6 @@ const columns: ColumnDef<Deudor>[] = [
     title: 'Nombre',
     width: 200,
   }),
-  createBasicColumn({
-    key: 'email',
-    title: 'Email',
-    width: 180,
-    render: value => (
-      <a href={`mailto:${value as string}`} className="link link-primary">
-        {value as string}
-      </a>
-    ),
-  }),
-  createBasicColumn({
-    key: 'telefono',
-    title: 'Teléfono',
-    width: 120,
-    render: value => (
-      <a href={`tel:${value as string}`} className="link">
-        {value as string}
-      </a>
-    ),
-  }),
-  {
-    accessorKey: 'acreedor.nombreCortoBanco',
-    header: 'Banco',
-    cell: ({ getValue }) => (
-      <span className="badge badge-outline text-xs">{getValue() as string}</span>
-    ),
-    size: 150,
-  },
   {
     accessorKey: 'acreedor.nombre',
     header: 'Acreedor',
