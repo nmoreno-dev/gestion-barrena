@@ -161,7 +161,7 @@ export function PlantillasAccordion() {
                     key={index}
                     className="bg-base-100 rounded-lg border border-base-300 overflow-hidden"
                   >
-                    <div className={`${category.bgColor} p-3 border-b border-base-300`}>
+                    <div className={`p-3 border-b border-base-300`}>
                       <div className="flex items-center gap-2">
                         <IconComponent className={category.color} size={18} />
                         <h5 className="font-medium">{category.title}</h5>

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
   PlantillasHeader,
-  PlantillasAccordion,
   PlantillasSearch,
   PlantillasList,
   PlantillasEmptyState,
 } from './components';
+import { useNavigate } from '@tanstack/react-router';
 
 // Mock data para la UI
 const mockPlantillas = [
@@ -34,6 +34,7 @@ const mockPlantillas = [
 
 function Plantillas() {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   // Filtrar plantillas basado en el término de búsqueda
   const filteredPlantillas = mockPlantillas.filter(plantilla =>
@@ -42,7 +43,7 @@ function Plantillas() {
 
   // Handlers para las acciones
   const handleCreatePlantilla = () => {
-    console.log('Crear nueva plantilla');
+    navigate({ to: '/plantillas/crear' });
   };
 
   const handleEditPlantilla = (id: string) => {
@@ -61,9 +62,6 @@ function Plantillas() {
     <div className="w-full space-y-6">
       {/* Header principal */}
       <PlantillasHeader onCreateClick={handleCreatePlantilla} />
-
-      {/* Acordeón instructivo */}
-      <PlantillasAccordion />
 
       {/* Barra de búsqueda */}
       <PlantillasSearch

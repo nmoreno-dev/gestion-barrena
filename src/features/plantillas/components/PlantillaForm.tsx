@@ -7,6 +7,7 @@ import { useCreatePlantilla } from '../queries/plantillasQueries';
 import { AVAILABLE_TEMPLATE_VARIABLES } from '../interfaces/plantilla';
 import type { CreatePlantillaData } from '../interfaces/plantilla';
 import PlantillaPreview from './PlantillaPreview';
+import { PlantillasAccordion } from './PlantillasAccordion';
 
 function PlantillaForm() {
   const navigate = useNavigate();
@@ -67,6 +68,9 @@ function PlantillaForm() {
           </div>
         </div>
       </div>
+
+      {/* Acordeón instructivo */}
+      <PlantillasAccordion />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Formulario */}
