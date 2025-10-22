@@ -7,12 +7,7 @@ import {
 } from '@/common/components/Table/exports';
 import { toast } from '@/utils/toast';
 import { copyToClipboard } from '@/utils/clipboard';
-import {
-  createMessage,
-  sendEmail,
-  processPlantillaForDeudor,
-  type PlantillaData,
-} from '../../utils';
+import { sendEmail, processPlantillaForDeudor, type PlantillaData } from '../../utils';
 import formatCuil from '@/utils/cuilFormater';
 
 const copyMessageToClipboard = async (htmlString: string) => {
@@ -144,31 +139,41 @@ const TablaDeudores = ({
       title: 'Acciones',
       width: 120,
       render: deudor => {
-        // Usar plantilla seleccionada o la primera disponible, fallback a template por defecto
-        let bcc: string[];
-        let subject: string;
-        let message: string;
+        const handleSendEmail = () => {
+          // Usar plantilla seleccionada o la primera disponible
+          const plantillaToUse =
+            selectedPlantilla || (plantillas.length > 0 ? plantillas[0] : null);
 
-        const plantillaToUse = selectedPlantilla || (plantillas.length > 0 ? plantillas[0] : null);
+          if (!plantillaToUse) {
+            toast.error('Debes configurar al menos una plantilla para enviar emails', {
+              duration: 4000,
+            });
+            return;
+          }
 
-        if (plantillaToUse) {
           const processed = processPlantillaForDeudor(plantillaToUse, deudor);
-          bcc = processed.bcc;
-          subject = processed.subject;
-          message = processed.body;
-        } else {
-          // Fallback al template por defecto solo si no hay plantillas
-          bcc = ['micaelarecabarren94@gmail.com'];
-          subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ADELANTOS.COM - TEM`;
-          message = createMessage(deudor);
-        }
 
-        const onSendEmail = () => {
           sendEmail({
             to: [deudor.email],
-            bcc,
-            subject,
+            bcc: processed.bcc,
+            subject: processed.subject,
           });
+        };
+
+        const handleCopyMessage = () => {
+          // Usar plantilla seleccionada o la primera disponible
+          const plantillaToUse =
+            selectedPlantilla || (plantillas.length > 0 ? plantillas[0] : null);
+
+          if (!plantillaToUse) {
+            toast.error('Debes configurar al menos una plantilla para copiar mensajes', {
+              duration: 4000,
+            });
+            return;
+          }
+
+          const processed = processPlantillaForDeudor(plantillaToUse, deudor);
+          copyMessageToClipboard(processed.body);
         };
 
         return (
@@ -176,14 +181,14 @@ const TablaDeudores = ({
             <button
               className="btn btn-ghost btn-xs text-xl"
               title="Enviar Mail"
-              onClick={onSendEmail}
+              onClick={handleSendEmail}
             >
               📨
             </button>
             <button
               className="btn btn-ghost btn-xs text-xl"
               title="Copiar Mensaje"
-              onClick={() => copyMessageToClipboard(message)}
+              onClick={handleCopyMessage}
             >
               📄
             </button>
