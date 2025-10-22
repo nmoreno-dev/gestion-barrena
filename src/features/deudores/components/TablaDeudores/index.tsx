@@ -7,7 +7,12 @@ import {
 } from '@/common/components/Table/exports';
 import { toast } from '@/utils/toast';
 import { copyToClipboard } from '@/utils/clipboard';
-import { createMessage, sendEmail } from '../../utils';
+import {
+  createMessage,
+  sendEmail,
+  processPlantillaForDeudor,
+  type PlantillaData,
+} from '../../utils';
 import formatCuil from '@/utils/cuilFormater';
 
 const copyMessageToClipboard = async (htmlString: string) => {
@@ -52,116 +57,197 @@ const copyCellValueToClipboard = async (value: string, label: string) => {
   }
 };
 
-const columns: ColumnDef<Deudor>[] = [
-  createBasicColumn({
-    key: 'cuil',
-    title: 'CUIL',
-    render: value => {
-      const formattedCuil = formatCuil(value as string);
-      return (
+const TablaDeudores = ({
+  deudores,
+  plantillas = [],
+  selectedPlantillaId,
+  onPlantillaChange,
+  isLoadingPlantillas = false,
+}: {
+  deudores: Deudor[];
+  plantillas?: PlantillaData[];
+  selectedPlantillaId?: string | null;
+  onPlantillaChange?: (id: string | null) => void;
+  isLoadingPlantillas?: boolean;
+}) => {
+  // Encontrar la plantilla seleccionada
+  const selectedPlantilla = selectedPlantillaId
+    ? plantillas.find(p => p.id === selectedPlantillaId)
+    : null;
+
+  // Crear columnas dinámicamente basadas en si hay plantilla seleccionada
+  const columns: ColumnDef<Deudor>[] = [
+    createBasicColumn({
+      key: 'cuil',
+      title: 'CUIL',
+      render: value => {
+        const formattedCuil = formatCuil(value as string);
+        return (
+          <span
+            className="underline cursor-pointer hover:text-success"
+            title="Click para copiar CUIL"
+            onClick={() => copyCellValueToClipboard(value as string, 'CUIL')}
+          >
+            {formattedCuil}
+          </span>
+        );
+      },
+    }),
+    createBasicColumn({
+      key: 'nombre',
+      title: 'Nombre',
+      width: 200,
+    }),
+    {
+      accessorKey: 'acreedor.nombre',
+      header: 'Acreedor',
+      size: 150,
+    },
+    createBasicColumn({
+      key: 'numeroCredito',
+      title: 'N° Crédito',
+      width: 120,
+      align: 'center',
+      render: value => (
         <span
           className="underline cursor-pointer hover:text-success"
-          title="Click para copiar CUIL"
-          onClick={() => copyCellValueToClipboard(value as string, 'CUIL')}
+          title="Click para copiar N° Crédito"
+          onClick={() => copyCellValueToClipboard(value.toString(), 'N° Crédito')}
         >
-          {formattedCuil}
+          {value.toString()}
         </span>
-      );
-    },
-  }),
-  createBasicColumn({
-    key: 'nombre',
-    title: 'Nombre',
-    width: 200,
-  }),
-  {
-    accessorKey: 'acreedor.nombre',
-    header: 'Acreedor',
-    size: 150,
-  },
-  createBasicColumn({
-    key: 'numeroCredito',
-    title: 'N° Crédito',
-    width: 120,
-    align: 'center',
-    render: value => (
-      <span
-        className="underline cursor-pointer hover:text-success"
-        title="Click para copiar N° Crédito"
-        onClick={() => copyCellValueToClipboard(value.toString(), 'N° Crédito')}
-      >
-        {value.toString()}
-      </span>
-    ),
-  }),
-  createBasicColumn({
-    key: 'deudaActual',
-    title: 'Deuda Actual',
-    width: 130,
-    align: 'right',
-    render: value => (
-      <span className="font-mono text-success">
-        ${Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-      </span>
-    ),
-  }),
-  createBasicColumn({
-    key: 'deudaCancelatoria',
-    title: 'Deuda Cancelatoria',
-    width: 150,
-    align: 'right',
-    render: value => (
-      <span className="font-mono text-warning">
-        ${Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-      </span>
-    ),
-  }),
-  createActionColumn({
-    title: 'Acciones',
-    width: 120,
-    render: deudor => {
-      const bcc = ['micaelarecabarren94@gmail.com'];
-      const subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ADELANTOS.COM - TEM`;
-      const message = createMessage(deudor);
-      const onSendEmail = () => {
-        sendEmail({
-          to: [deudor.email],
-          bcc,
-          subject,
-        });
-      };
+      ),
+    }),
+    createBasicColumn({
+      key: 'deudaActual',
+      title: 'Deuda Actual',
+      width: 130,
+      align: 'right',
+      render: value => (
+        <span className="font-mono text-success">
+          ${Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    }),
+    createBasicColumn({
+      key: 'deudaCancelatoria',
+      title: 'Deuda Cancelatoria',
+      width: 150,
+      align: 'right',
+      render: value => (
+        <span className="font-mono text-warning">
+          ${Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+        </span>
+      ),
+    }),
+    createActionColumn({
+      title: 'Acciones',
+      width: 120,
+      render: deudor => {
+        // Si hay plantilla seleccionada, usar esa
+        let bcc: string[];
+        let subject: string;
+        let message: string;
 
-      return (
-        <div className="flex gap-1">
-          <button
-            className="btn btn-ghost btn-xs text-xl"
-            title="Enviar Mail"
-            onClick={onSendEmail}
-          >
-            📨
-          </button>
-          <button
-            className="btn btn-ghost btn-xs text-xl"
-            title="Copiar Mensaje"
-            onClick={() => copyMessageToClipboard(message)}
-          >
-            📄
-          </button>
-        </div>
-      );
-    },
-  }),
-];
+        if (selectedPlantilla) {
+          const processed = processPlantillaForDeudor(selectedPlantilla, deudor);
+          bcc = processed.bcc;
+          subject = processed.subject;
+          message = processed.body;
+        } else {
+          // Fallback al template por defecto
+          bcc = ['micaelarecabarren94@gmail.com'];
+          subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ADELANTOS.COM - TEM`;
+          message = createMessage(deudor);
+        }
 
-const TablaDeudores = ({ deudores }: { deudores: Deudor[] }) => {
+        const onSendEmail = () => {
+          sendEmail({
+            to: [deudor.email],
+            bcc,
+            subject,
+          });
+        };
+
+        return (
+          <div className="flex gap-1">
+            <button
+              className="btn btn-ghost btn-xs text-xl"
+              title="Enviar Mail"
+              onClick={onSendEmail}
+            >
+              📨
+            </button>
+            <button
+              className="btn btn-ghost btn-xs text-xl"
+              title="Copiar Mensaje"
+              onClick={() => copyMessageToClipboard(message)}
+            >
+              📄
+            </button>
+          </div>
+        );
+      },
+    }),
+  ];
+
   return (
     <div className="card bg-base-100 shadow-sm">
       <div className="card-body">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between items-center mb-4 flex-col md:flex-row gap-4">
           <h3 className="text-3xl font-semibold">
             Lista de Deudores ({deudores.length} registros)
           </h3>
+
+          {/* Dropdown de selección de plantilla */}
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <label className="text-sm font-medium whitespace-nowrap">Plantilla:</label>
+            {isLoadingPlantillas ? (
+              <span className="loading loading-spinner loading-sm"></span>
+            ) : plantillas.length === 0 ? (
+              <div className="text-sm text-base-content/60 italic">
+                No hay plantillas configuradas
+              </div>
+            ) : (
+              <select
+                className="select select-bordered select-sm w-full md:w-64"
+                value={selectedPlantillaId || ''}
+                onChange={e => onPlantillaChange?.(e.target.value || null)}
+              >
+                <option value="">Template por defecto</option>
+                {plantillas.map(plantilla => (
+                  <option key={plantilla.id} value={plantilla.id}>
+                    {plantilla.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
+
+        {/* Indicador de plantilla seleccionada */}
+        {selectedPlantilla && (
+          <div className="alert alert-info mb-4">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              className="stroke-current shrink-0 w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <div>
+              <div className="font-semibold">Usando plantilla: {selectedPlantilla.name}</div>
+              <div className="text-sm">Asunto: {selectedPlantilla.subject}</div>
+            </div>
+          </div>
+        )}
+
         <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
       </div>
     </div>

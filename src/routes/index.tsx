@@ -10,6 +10,7 @@ import {
   formatLoadDate,
 } from '@/features/deudores/utils';
 import { toast } from '@/utils/toast';
+import { usePlantillasForDeudores } from '@/common/hooks';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -22,6 +23,10 @@ function HomePage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [showClearModal, setShowClearModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
+
+  // Cargar plantillas disponibles
+  const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
 
   // Cargar datos de IndexedDB al iniciar
   useEffect(() => {
@@ -142,7 +147,13 @@ function HomePage() {
         </div>
       </div>
 
-      <TablaDeudores deudores={deudores} />
+      <TablaDeudores
+        deudores={deudores}
+        plantillas={plantillas}
+        selectedPlantillaId={selectedPlantillaId}
+        onPlantillaChange={setSelectedPlantillaId}
+        isLoadingPlantillas={isLoadingPlantillas}
+      />
 
       {/* Modal de confirmación para eliminar datos */}
       {showClearModal && (
