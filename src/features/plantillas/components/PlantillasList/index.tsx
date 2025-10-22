@@ -5,10 +5,9 @@ interface PlantillasListProps {
   plantillas: Plantilla[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  onPreview: (id: string) => void;
 }
 
-export function PlantillasList({ plantillas, onEdit, onDelete, onPreview }: PlantillasListProps) {
+export function PlantillasList({ plantillas, onEdit, onDelete }: PlantillasListProps) {
   return (
     <div className="space-y-4">
       {plantillas.map(plantilla => (
@@ -17,7 +16,6 @@ export function PlantillasList({ plantillas, onEdit, onDelete, onPreview }: Plan
           plantilla={plantilla}
           onEdit={onEdit}
           onDelete={onDelete}
-          onPreview={onPreview}
         />
       ))}
     </div>

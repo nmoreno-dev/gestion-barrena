@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { FileText, Edit, Trash2, Eye } from 'lucide-react';
+import PlantillaPreview from '../PlantillaPreview';
 
 interface Plantilla {
   id: string;
@@ -14,10 +16,10 @@ interface PlantillaCardProps {
   plantilla: Plantilla;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
-  onPreview: (id: string) => void;
 }
 
-export function PlantillaCard({ plantilla, onEdit, onDelete, onPreview }: PlantillaCardProps) {
+export function PlantillaCard({ plantilla, onEdit, onDelete }: PlantillaCardProps) {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   return (
     <div className="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
       <div className="card-body">
@@ -55,33 +57,25 @@ export function PlantillaCard({ plantilla, onEdit, onDelete, onPreview }: Planti
 
             {/* BCC si existe */}
             {plantilla.bcc && plantilla.bcc.length > 0 && (
-              <div className="mb-4">
-                <div className="text-xs text-base-content/50 mb-1">BCC:</div>
+              <div className="mb-4  flex gap-2 items-center">
+                <div className="text-base-content/50">BCC:</div>
                 <div className="flex flex-wrap gap-1">
                   {plantilla.bcc.slice(0, 2).map((email, index) => (
-                    <div key={index} className="badge badge-sm badge-ghost">
+                    <div key={index} className="badge badge-ghost">
                       {email}
                     </div>
                   ))}
                   {plantilla.bcc.length > 2 && (
-                    <div className="badge badge-sm badge-ghost">+{plantilla.bcc.length - 2}</div>
+                    <div className="badge badge-ghost">+{plantilla.bcc.length - 2}</div>
                   )}
                 </div>
               </div>
             )}
-
-            {/* Variables detectadas */}
-            <div className="flex flex-wrap gap-1">
-              <span className="text-xs text-base-content/50">Variables:</span>
-              <div className="badge badge-sm badge-outline">[DEUDOR_NOMBRE]</div>
-              <div className="badge badge-sm badge-outline">[DEUDA_ACTUAL]</div>
-              <div className="badge badge-sm badge-outline">+2 más</div>
-            </div>
           </div>
 
           {/* Acciones */}
           <div className="flex flex-col gap-2">
-            <button className="btn btn-ghost btn-sm gap-2" onClick={() => onPreview(plantilla.id)}>
+            <button className="btn btn-ghost btn-sm gap-2" onClick={() => setIsPreviewOpen(true)}>
               <Eye size={14} />
               Vista Previa
             </button>
@@ -99,6 +93,33 @@ export function PlantillaCard({ plantilla, onEdit, onDelete, onPreview }: Planti
           </div>
         </div>
       </div>
+
+      {/* Modal de Vista Previa */}
+      {isPreviewOpen && (
+        <dialog className="modal modal-open">
+          <div className="modal-box max-w-4xl">
+            <form method="dialog">
+              <button
+                type="button"
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                onClick={() => setIsPreviewOpen(false)}
+              >
+                ✕
+              </button>
+            </form>
+            <PlantillaPreview
+              name={plantilla.name}
+              subject={plantilla.subject}
+              body={plantilla.body}
+            />
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button type="button" onClick={() => setIsPreviewOpen(false)}>
+              close
+            </button>
+          </form>
+        </dialog>
+      )}
     </div>
   );
 }

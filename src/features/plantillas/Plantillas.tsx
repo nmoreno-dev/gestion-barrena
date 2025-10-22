@@ -37,11 +37,6 @@ function Plantillas() {
     }
   };
 
-  const handlePreviewPlantilla = (id: string) => {
-    console.log('Vista previa plantilla:', id);
-    // TODO: Implementar modal de vista previa
-  };
-
   // Loading state
   if (isLoading) {
     return (
@@ -105,7 +100,6 @@ function Plantillas() {
           plantillas={filteredPlantillas}
           onEdit={handleEditPlantilla}
           onDelete={handleDeletePlantilla}
-          onPreview={handlePreviewPlantilla}
         />
       )}
     </div>
