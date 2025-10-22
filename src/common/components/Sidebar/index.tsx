@@ -1,5 +1,6 @@
 import { useSidebar } from '@/common/hooks';
-import { X } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import { X, Home, FileText } from 'lucide-react';
 
 interface SidebarProps {
   children?: React.ReactNode;
@@ -7,6 +8,21 @@ interface SidebarProps {
 
 export function Sidebar({ children }: SidebarProps) {
   const { close } = useSidebar();
+
+  const navigationItems = [
+    {
+      to: '/',
+      label: 'Inicio',
+      icon: Home,
+      description: 'Gestión de Deudores',
+    },
+    {
+      to: '/plantillas',
+      label: 'Plantillas',
+      icon: FileText,
+      description: 'Gestión de Plantillas',
+    },
+  ];
 
   return (
     <div className="drawer-side z-50">
@@ -24,15 +40,35 @@ export function Sidebar({ children }: SidebarProps) {
           </button>
         </div>
 
-        {/* Contenido del sidebar */}
-        <div className="flex-1 p-4 overflow-y-auto">
-          {children || (
-            <div className="text-center text-base-content/60 mt-8">
-              <p>Contenido del sidebar</p>
-              <p className="text-sm mt-2">Aquí irán los elementos del menú</p>
-            </div>
-          )}
-        </div>
+        {/* Navegación del sidebar */}
+        <nav className="flex-1 p-4 overflow-y-auto">
+          <ul className="menu bg-base-200 space-y-2">
+            {navigationItems.map(item => {
+              const IconComponent = item.icon;
+              return (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-base-300 transition-colors"
+                    activeProps={{
+                      className: 'bg-primary text-primary-content hover:bg-primary/90',
+                    }}
+                    onClick={close}
+                  >
+                    <IconComponent size={20} />
+                    <div className="flex-1">
+                      <div className="font-medium">{item.label}</div>
+                      <div className="text-xs opacity-70">{item.description}</div>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Contenido adicional si se proporciona */}
+          {children && <div className="mt-6 pt-4 border-t border-base-300">{children}</div>}
+        </nav>
       </aside>
     </div>
   );
