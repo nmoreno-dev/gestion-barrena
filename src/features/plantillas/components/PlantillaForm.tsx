@@ -1,25 +1,12 @@
 import { useNavigate } from '@tanstack/react-router';
-import { ArrowLeft, Eye, FileText } from 'lucide-react';
+import { ArrowLeft, FileText } from 'lucide-react';
 import { useAppForm, fieldContext, formContext } from '@/common/hooks';
 import { SubmitButton } from '@/common/components/Form/Atoms/SubmitButton';
 import TextField from '@/common/components/Form/Atoms/TextInput';
 import { useCreatePlantilla } from '../queries/plantillasQueries';
 import { AVAILABLE_TEMPLATE_VARIABLES } from '../interfaces/plantilla';
 import type { CreatePlantillaData } from '../interfaces/plantilla';
-
-// Datos de ejemplo para el preview
-const EXAMPLE_DATA = {
-  '[DEUDOR_NOMBRE]': 'Juan Carlos Pérez',
-  '[DEUDOR_CUIL]': '20-12345678-9',
-  '[NUMERO_CREDITO]': '123456',
-  '[DEUDA_ACTUAL]': '$125.850,00',
-  '[DEUDA_CANCELATORIA]': '$100.680,00',
-  '[PLAZO_VENCIMIENTO]': '15/12/2024',
-  '[ACREEDOR_BANCO]': 'BBVA Argentina',
-  '[ACREEDOR_NOMBRE_EMPRESA]': 'ADELANTOS.COM',
-  '[ACREEDOR_CBU]': '0110599520000012345678',
-  '[ACREEDOR_ALIAS]': 'ADELANTOS.EMPRESA',
-};
+import PlantillaPreview from './PlantillaPreview';
 
 function PlantillaForm() {
   const navigate = useNavigate();
@@ -39,18 +26,6 @@ function PlantillaForm() {
       }
     },
   });
-
-  // Función para reemplazar variables en el preview
-  const getPreviewText = (text: string) => {
-    let preview = text;
-    Object.entries(EXAMPLE_DATA).forEach(([variable, value]) => {
-      preview = preview.replace(
-        new RegExp(variable.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-        value,
-      );
-    });
-    return preview;
-  };
 
   // Insertar variable en el cursor del textarea
   const insertVariable = (variable: string) => {
@@ -224,59 +199,11 @@ function PlantillaForm() {
 
         {/* Preview siempre visible */}
         <div className="space-y-6">
-          <div className="card bg-base-200 sticky top-6">
-            <div className="card-body">
-              <h3 className="card-title text-lg">
-                <Eye className="w-5 h-5" />
-                Vista Previa
-              </h3>
-              <p className="text-sm text-base-content/60 mb-4">
-                Así se verá tu plantilla con datos de ejemplo
-              </p>
-
-              <div className="bg-base-300 p-4 rounded-lg border-l-4 border-primary min-h-[200px]">
-                <form.Subscribe selector={state => [state.values.name, state.values.body]}>
-                  {([currentName, currentBody]) => (
-                    <div className="prose max-w-none">
-                      <h4 className="text-base font-semibold mb-2 text-primary">
-                        {currentName || 'Sin nombre'}
-                      </h4>
-                      <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                        {currentBody ? (
-                          getPreviewText(currentBody)
-                        ) : (
-                          <span className="text-base-content/40 italic">
-                            El contenido aparecerá aquí mientras escribes...
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </form.Subscribe>
-              </div>
-
-              {/* Información de variables usadas */}
-              <div className="mt-4">
-                <div className="text-sm text-base-content/60">
-                  <span className="font-medium">Variables de ejemplo:</span>
-                  <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
-                    <li>
-                      <code className="text-primary">[DEUDOR_NOMBRE]</code> → Juan Carlos Pérez
-                    </li>
-                    <li>
-                      <code className="text-primary">[DEUDOR_CUIL]</code> → 20-12345678-9
-                    </li>
-                    <li>
-                      <code className="text-primary">[DEUDA_ACTUAL]</code> → $125.850,00
-                    </li>
-                    <li>
-                      <code className="text-primary">[ACREEDOR_BANCO]</code> → BBVA Argentina
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
+          <form.Subscribe selector={state => [state.values.name, state.values.body]}>
+            {([currentName, currentBody]) => (
+              <PlantillaPreview name={currentName || ''} body={currentBody || ''} />
+            )}
+          </form.Subscribe>
         </div>
       </div>
     </div>

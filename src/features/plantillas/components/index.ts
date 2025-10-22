@@ -6,3 +6,4 @@ export { PlantillaCard } from './PlantillaCard';
 export { PlantillasList } from './PlantillasList';
 export { PlantillasEmptyState } from './PlantillasEmptyState';
 export { default as PlantillaForm } from './PlantillaForm';
+export { default as PlantillaPreview } from './PlantillaPreview';
