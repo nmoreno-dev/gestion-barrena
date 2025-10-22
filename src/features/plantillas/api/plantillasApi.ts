@@ -1,29 +1,5 @@
+import { executeStoreOperation, STORES } from '@/app/db';
 import { Plantilla, CreatePlantillaData, UpdatePlantillaData } from '../interfaces/plantilla';
-
-const DB_NAME = 'GestionBarrenaDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'plantillas';
-
-// Configurar IndexedDB
-function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(request.result);
-
-    request.onupgradeneeded = () => {
-      const db = request.result;
-
-      // Crear store de plantillas si no existe
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        store.createIndex('name', 'name', { unique: false });
-        store.createIndex('createdAt', 'createdAt', { unique: false });
-      }
-    };
-  });
-}
 
 // Generar ID único
 function generateId(): string {
@@ -32,81 +8,58 @@ function generateId(): string {
 
 // Obtener todas las plantillas
 export async function getPlantillas(): Promise<Plantilla[]> {
-  const db = await openDB();
+  const plantillas = await executeStoreOperation(STORES.PLANTILLAS, 'readonly', store =>
+    store.getAll(),
+  );
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.getAll();
+  // Convertir fechas y ordenar
+  const processedPlantillas = plantillas.map((plantilla: Plantilla) => ({
+    ...plantilla,
+    createdAt: new Date(plantilla.createdAt),
+    updatedAt: new Date(plantilla.updatedAt),
+  }));
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const plantillas = request.result.map((plantilla: Plantilla) => ({
-        ...plantilla,
-        createdAt: new Date(plantilla.createdAt),
-        updatedAt: new Date(plantilla.updatedAt),
-      }));
+  // Ordenar por fecha de creación (más recientes primero)
+  processedPlantillas.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-      // Ordenar por fecha de creación (más recientes primero)
-      plantillas.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-      resolve(plantillas);
-    };
-  });
+  return processedPlantillas;
 }
 
 // Obtener una plantilla por ID
 export async function getPlantillaById(id: string): Promise<Plantilla | null> {
-  const db = await openDB();
+  const result = await executeStoreOperation(STORES.PLANTILLAS, 'readonly', store => store.get(id));
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readonly');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.get(id);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => {
-      const result = request.result;
-      if (result) {
-        resolve({
-          ...result,
-          createdAt: new Date(result.createdAt),
-          updatedAt: new Date(result.updatedAt),
-        });
-      } else {
-        resolve(null);
-      }
+  if (result) {
+    return {
+      ...result,
+      createdAt: new Date(result.createdAt),
+      updatedAt: new Date(result.updatedAt),
     };
-  });
+  }
+
+  return null;
 }
 
 // Crear una nueva plantilla
 export async function createPlantilla(data: CreatePlantillaData): Promise<Plantilla> {
-  const db = await openDB();
-
   const now = new Date();
   const plantilla: Plantilla = {
     id: generateId(),
     name: data.name.trim(),
+    subject: data.subject.trim(),
     body: data.body.trim(),
+    bcc: data.bcc.map(email => email.trim()).filter(email => email.length > 0),
     createdAt: now,
     updatedAt: now,
   };
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.add(plantilla);
+  await executeStoreOperation(STORES.PLANTILLAS, 'readwrite', store => store.add(plantilla));
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(plantilla);
-  });
+  return plantilla;
 }
 
 // Actualizar una plantilla existente
 export async function updatePlantilla(id: string, data: UpdatePlantillaData): Promise<Plantilla> {
-  const db = await openDB();
-
   // Primero obtener la plantilla existente
   const existingPlantilla = await getPlantillaById(id);
   if (!existingPlantilla) {
@@ -117,32 +70,22 @@ export async function updatePlantilla(id: string, data: UpdatePlantillaData): Pr
     ...existingPlantilla,
     ...data,
     name: data.name?.trim() ?? existingPlantilla.name,
+    subject: data.subject?.trim() ?? existingPlantilla.subject,
     body: data.body?.trim() ?? existingPlantilla.body,
+    bcc: data.bcc
+      ? data.bcc.map(email => email.trim()).filter(email => email.length > 0)
+      : existingPlantilla.bcc,
     updatedAt: new Date(),
   };
 
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.put(updatedPlantilla);
+  await executeStoreOperation(STORES.PLANTILLAS, 'readwrite', store => store.put(updatedPlantilla));
 
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve(updatedPlantilla);
-  });
+  return updatedPlantilla;
 }
 
 // Eliminar una plantilla
 export async function deletePlantilla(id: string): Promise<void> {
-  const db = await openDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.delete(id);
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
+  await executeStoreOperation(STORES.PLANTILLAS, 'readwrite', store => store.delete(id));
 }
 
 // Verificar si existe una plantilla con el mismo nombre
@@ -160,16 +103,7 @@ export async function checkPlantillaNombreExists(
 
 // Limpiar todas las plantillas (para testing o reset)
 export async function clearAllPlantillas(): Promise<void> {
-  const db = await openDB();
-
-  return new Promise((resolve, reject) => {
-    const transaction = db.transaction([STORE_NAME], 'readwrite');
-    const store = transaction.objectStore(STORE_NAME);
-    const request = store.clear();
-
-    request.onerror = () => reject(request.error);
-    request.onsuccess = () => resolve();
-  });
+  await executeStoreOperation(STORES.PLANTILLAS, 'readwrite', store => store.clear());
 }
 
 export default {
