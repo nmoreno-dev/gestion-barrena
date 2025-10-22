@@ -4,11 +4,10 @@ import formatCuil from '@/utils/cuilFormater';
 import { Plantilla } from '../interfaces/plantilla';
 
 /**
- * Procesa una plantilla reemplazando las variables de template por datos reales del deudor
- * Utiliza el mismo sistema de template strings que messageTemplate.ts
+ * Procesa el texto de una plantilla reemplazando las variables de template por datos reales del deudor
  */
-export function processPlantilla(plantilla: Plantilla, deudor: Deudor): string {
-  return plantilla.body
+function replaceVariables(text: string, deudor: Deudor): string {
+  return text
     .replaceAll('[DEUDOR_NOMBRE]', deudor.nombre)
     .replaceAll('[DEUDOR_CUIL]', formatCuil(deudor.cuil))
     .replaceAll('[NUMERO_CREDITO]', deudor.numeroCredito.toString())
@@ -41,6 +40,21 @@ export function processPlantilla(plantilla: Plantilla, deudor: Deudor): string {
       '[ACREEDOR_TIPO_CUENTA]',
       deudor.acreedor.tipoCuenta ? `TIPO DE CUENTA: ${deudor.acreedor.tipoCuenta}<br><br>` : '<br>',
     );
+}
+
+/**
+ * Procesa una plantilla completa reemplazando las variables de template por datos reales del deudor
+ * Retorna un objeto con el subject y body procesados
+ */
+export function processPlantilla(
+  plantilla: Plantilla,
+  deudor: Deudor,
+): { subject: string; body: string; bcc: string[] } {
+  return {
+    subject: replaceVariables(plantilla.subject, deudor),
+    body: replaceVariables(plantilla.body, deudor),
+    bcc: plantilla.bcc,
+  };
 }
 
 /**

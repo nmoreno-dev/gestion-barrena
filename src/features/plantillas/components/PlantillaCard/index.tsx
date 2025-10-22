@@ -3,7 +3,9 @@ import { FileText, Edit, Trash2, Eye } from 'lucide-react';
 interface Plantilla {
   id: string;
   name: string;
+  subject: string;
   body: string;
+  bcc: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,6 +37,14 @@ export function PlantillaCard({ plantilla, onEdit, onDelete, onPreview }: Planti
               </div>
             </div>
 
+            {/* Preview del asunto */}
+            <div className="bg-base-200 rounded-lg p-2 mb-2">
+              <div className="text-xs text-base-content/50 mb-1">ASUNTO:</div>
+              <div className="text-sm font-medium text-base-content/80 line-clamp-1">
+                {plantilla.subject}
+              </div>
+            </div>
+
             {/* Preview del contenido */}
             <div className="bg-base-200 rounded-lg p-3 mb-4">
               <div className="text-sm text-base-content/70 line-clamp-2">
@@ -42,6 +52,23 @@ export function PlantillaCard({ plantilla, onEdit, onDelete, onPreview }: Planti
                 {plantilla.body.length > 150 && '...'}
               </div>
             </div>
+
+            {/* BCC si existe */}
+            {plantilla.bcc && plantilla.bcc.length > 0 && (
+              <div className="mb-4">
+                <div className="text-xs text-base-content/50 mb-1">BCC:</div>
+                <div className="flex flex-wrap gap-1">
+                  {plantilla.bcc.slice(0, 2).map((email, index) => (
+                    <div key={index} className="badge badge-sm badge-ghost">
+                      {email}
+                    </div>
+                  ))}
+                  {plantilla.bcc.length > 2 && (
+                    <div className="badge badge-sm badge-ghost">+{plantilla.bcc.length - 2}</div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Variables detectadas */}
             <div className="flex flex-wrap gap-1">

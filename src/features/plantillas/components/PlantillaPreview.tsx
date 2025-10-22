@@ -23,10 +23,11 @@ const EXAMPLE_DATA = {
 
 interface PlantillaPreviewProps {
   name: string;
+  subject: string;
   body: string;
 }
 
-function PlantillaPreview({ name, body }: PlantillaPreviewProps) {
+function PlantillaPreview({ name, subject, body }: PlantillaPreviewProps) {
   // Función para reemplazar variables en el preview
   const getPreviewText = (text: string) => {
     let preview = text;
@@ -61,22 +62,37 @@ function PlantillaPreview({ name, body }: PlantillaPreviewProps) {
         <div className="bg-base-300 p-4 rounded-lg border-l-4 border-primary min-h-[200px]">
           <div className="prose max-w-none">
             <h4 className="text-base font-semibold mb-2 text-primary">{name || 'Sin nombre'}</h4>
-            <div className="bg-white p-4 rounded border text-black">
-              {body ? (
-                <div
-                  style={{
-                    fontFamily: 'Arial, sans-serif',
-                    fontSize: '14px',
-                    lineHeight: '1.6',
-                    color: '#000000',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: getPreviewText(body) }}
-                />
-              ) : (
-                <span className="text-gray-400 italic">
-                  El contenido aparecerá aquí mientras escribes...
+
+            {/* Preview del asunto */}
+            <div className="mb-3">
+              <span className="text-xs text-base-content/60 font-medium">ASUNTO:</span>
+              <div className="bg-base-100 p-2 rounded mt-1">
+                <span className="text-sm font-semibold">
+                  {subject ? getPreviewText(subject) : 'Sin asunto'}
                 </span>
-              )}
+              </div>
+            </div>
+
+            {/* Preview del cuerpo */}
+            <div>
+              <span className="text-xs text-base-content/60 font-medium">MENSAJE:</span>
+              <div className="bg-white p-4 rounded border text-black mt-1">
+                {body ? (
+                  <div
+                    style={{
+                      fontFamily: 'Arial, sans-serif',
+                      fontSize: '14px',
+                      lineHeight: '1.6',
+                      color: '#000000',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: getPreviewText(body) }}
+                  />
+                ) : (
+                  <span className="text-gray-400 italic">
+                    El contenido aparecerá aquí mientras escribes...
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

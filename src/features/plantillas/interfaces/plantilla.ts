@@ -1,19 +1,25 @@
 export interface Plantilla {
   id: string;
   name: string;
+  subject: string;
   body: string;
+  bcc: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export interface CreatePlantillaData {
   name: string;
+  subject: string;
   body: string;
+  bcc: string[];
 }
 
 export interface UpdatePlantillaData {
   name?: string;
+  subject?: string;
   body?: string;
+  bcc?: string[];
 }
 
 export interface PlantillaPreviewData {
