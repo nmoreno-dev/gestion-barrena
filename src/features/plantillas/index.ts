@@ -1,6 +1,3 @@
-// Componente principal
-export { default as Plantillas } from './Plantillas';
-
 // API functions
 export * from './api';
 

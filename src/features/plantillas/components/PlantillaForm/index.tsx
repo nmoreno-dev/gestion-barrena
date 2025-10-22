@@ -4,10 +4,9 @@ import { useRef, useEffect } from 'react';
 import { useAppForm, fieldContext, formContext } from '@/common/hooks';
 import { SubmitButton } from '@/common/components/Form/Atoms/SubmitButton';
 import TextField from '@/common/components/Form/Atoms/TextInput';
-import { AVAILABLE_TEMPLATE_VARIABLES } from '../interfaces/plantilla';
-import type { CreatePlantillaData, Plantilla } from '../interfaces/plantilla';
-import PlantillaPreview from './PlantillaPreview';
-import { PlantillasAccordion } from './PlantillasAccordion';
+import { AVAILABLE_TEMPLATE_VARIABLES, CreatePlantillaData, Plantilla } from '../../api';
+import { PlantillasAccordion } from '../PlantillasAccordion';
+import PlantillaPreview from '../PlantillaPreview';
 
 interface PlantillaFormProps {
   mode: 'create' | 'edit';
