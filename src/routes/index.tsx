@@ -1,6 +1,6 @@
-import { TablaDeudores } from '@/features/dataLoading/components';
-import CsvLoader from '@/features/dataLoading/components/CSVLoader';
-import { Deudor } from '@/features/dataLoading/interfaces/deudor';
+import { TablaDeudores } from '@/features/deudores/components';
+import CsvLoader from '@/features/deudores/components/CSVLoader';
+import { Deudor } from '@/features/deudores/interfaces/deudor';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import {
@@ -8,8 +8,9 @@ import {
   saveDeudoresToStorage,
   clearStoredDeudores,
   formatLoadDate,
-} from '@/features/dataLoading/utils';
+} from '@/features/deudores/utils';
 import { toast } from '@/utils/toast';
+import { usePlantillasForDeudores } from '@/common/hooks';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -22,6 +23,17 @@ function HomePage() {
   const [fileName, setFileName] = useState<string | null>(null);
   const [showClearModal, setShowClearModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
+
+  // Cargar plantillas disponibles
+  const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
+
+  // Seleccionar automáticamente la primera plantilla cuando se cargan
+  useEffect(() => {
+    if (plantillas.length > 0 && !selectedPlantillaId) {
+      setSelectedPlantillaId(plantillas[0].id);
+    }
+  }, [plantillas, selectedPlantillaId]);
 
   // Cargar datos de IndexedDB al iniciar
   useEffect(() => {
@@ -142,7 +154,13 @@ function HomePage() {
         </div>
       </div>
 
-      <TablaDeudores deudores={deudores} />
+      <TablaDeudores
+        deudores={deudores}
+        plantillas={plantillas}
+        selectedPlantillaId={selectedPlantillaId}
+        onPlantillaChange={setSelectedPlantillaId}
+        isLoadingPlantillas={isLoadingPlantillas}
+      />
 
       {/* Modal de confirmación para eliminar datos */}
       {showClearModal && (

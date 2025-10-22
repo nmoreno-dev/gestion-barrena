@@ -9,120 +9,77 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as CustomersRouteRouteImport } from './routes/customers/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CustomersIndexRouteImport } from './routes/customers/index'
-import { Route as CustomersAddNewRouteImport } from './routes/customers/add-new'
-import { Route as CustomersCustomerIdRouteRouteImport } from './routes/customers/$customerId/route'
-import { Route as CustomersCustomerIdIndexRouteImport } from './routes/customers/$customerId/index'
-import { Route as CustomersCustomerIdEditRouteImport } from './routes/customers/$customerId/edit'
+import { Route as PlantillasIndexRouteImport } from './routes/plantillas/index'
+import { Route as PlantillasCrearRouteImport } from './routes/plantillas/crear'
+import { Route as PlantillasEditarSlugRouteImport } from './routes/plantillas/editar.$slug'
 
-const CustomersRouteRoute = CustomersRouteRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomersIndexRoute = CustomersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => CustomersRouteRoute,
+const PlantillasIndexRoute = PlantillasIndexRouteImport.update({
+  id: '/plantillas/',
+  path: '/plantillas/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const CustomersAddNewRoute = CustomersAddNewRouteImport.update({
-  id: '/add-new',
-  path: '/add-new',
-  getParentRoute: () => CustomersRouteRoute,
+const PlantillasCrearRoute = PlantillasCrearRouteImport.update({
+  id: '/plantillas/crear',
+  path: '/plantillas/crear',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const CustomersCustomerIdRouteRoute =
-  CustomersCustomerIdRouteRouteImport.update({
-    id: '/$customerId',
-    path: '/$customerId',
-    getParentRoute: () => CustomersRouteRoute,
-  } as any)
-const CustomersCustomerIdIndexRoute =
-  CustomersCustomerIdIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => CustomersCustomerIdRouteRoute,
-  } as any)
-const CustomersCustomerIdEditRoute = CustomersCustomerIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => CustomersCustomerIdRouteRoute,
+const PlantillasEditarSlugRoute = PlantillasEditarSlugRouteImport.update({
+  id: '/plantillas/editar/$slug',
+  path: '/plantillas/editar/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/customers': typeof CustomersRouteRouteWithChildren
-  '/customers/$customerId': typeof CustomersCustomerIdRouteRouteWithChildren
-  '/customers/add-new': typeof CustomersAddNewRoute
-  '/customers/': typeof CustomersIndexRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
-  '/customers/$customerId/': typeof CustomersCustomerIdIndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
+  '/plantillas': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/customers/add-new': typeof CustomersAddNewRoute
-  '/customers': typeof CustomersIndexRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
-  '/customers/$customerId': typeof CustomersCustomerIdIndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
+  '/plantillas': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/customers': typeof CustomersRouteRouteWithChildren
-  '/customers/$customerId': typeof CustomersCustomerIdRouteRouteWithChildren
-  '/customers/add-new': typeof CustomersAddNewRoute
-  '/customers/': typeof CustomersIndexRoute
-  '/customers/$customerId/edit': typeof CustomersCustomerIdEditRoute
-  '/customers/$customerId/': typeof CustomersCustomerIdIndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
+  '/plantillas/': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/customers'
-    | '/customers/$customerId'
-    | '/customers/add-new'
-    | '/customers/'
-    | '/customers/$customerId/edit'
-    | '/customers/$customerId/'
+    | '/plantillas/crear'
+    | '/plantillas'
+    | '/plantillas/editar/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/customers/add-new'
-    | '/customers'
-    | '/customers/$customerId/edit'
-    | '/customers/$customerId'
+  to: '/' | '/plantillas/crear' | '/plantillas' | '/plantillas/editar/$slug'
   id:
     | '__root__'
     | '/'
-    | '/customers'
-    | '/customers/$customerId'
-    | '/customers/add-new'
-    | '/customers/'
-    | '/customers/$customerId/edit'
-    | '/customers/$customerId/'
+    | '/plantillas/crear'
+    | '/plantillas/'
+    | '/plantillas/editar/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CustomersRouteRoute: typeof CustomersRouteRouteWithChildren
+  PlantillasCrearRoute: typeof PlantillasCrearRoute
+  PlantillasIndexRoute: typeof PlantillasIndexRoute
+  PlantillasEditarSlugRoute: typeof PlantillasEditarSlugRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/customers': {
-      id: '/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof CustomersRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -130,79 +87,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/customers/': {
-      id: '/customers/'
-      path: '/'
-      fullPath: '/customers/'
-      preLoaderRoute: typeof CustomersIndexRouteImport
-      parentRoute: typeof CustomersRouteRoute
+    '/plantillas/': {
+      id: '/plantillas/'
+      path: '/plantillas'
+      fullPath: '/plantillas'
+      preLoaderRoute: typeof PlantillasIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/customers/add-new': {
-      id: '/customers/add-new'
-      path: '/add-new'
-      fullPath: '/customers/add-new'
-      preLoaderRoute: typeof CustomersAddNewRouteImport
-      parentRoute: typeof CustomersRouteRoute
+    '/plantillas/crear': {
+      id: '/plantillas/crear'
+      path: '/plantillas/crear'
+      fullPath: '/plantillas/crear'
+      preLoaderRoute: typeof PlantillasCrearRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/customers/$customerId': {
-      id: '/customers/$customerId'
-      path: '/$customerId'
-      fullPath: '/customers/$customerId'
-      preLoaderRoute: typeof CustomersCustomerIdRouteRouteImport
-      parentRoute: typeof CustomersRouteRoute
-    }
-    '/customers/$customerId/': {
-      id: '/customers/$customerId/'
-      path: '/'
-      fullPath: '/customers/$customerId/'
-      preLoaderRoute: typeof CustomersCustomerIdIndexRouteImport
-      parentRoute: typeof CustomersCustomerIdRouteRoute
-    }
-    '/customers/$customerId/edit': {
-      id: '/customers/$customerId/edit'
-      path: '/edit'
-      fullPath: '/customers/$customerId/edit'
-      preLoaderRoute: typeof CustomersCustomerIdEditRouteImport
-      parentRoute: typeof CustomersCustomerIdRouteRoute
+    '/plantillas/editar/$slug': {
+      id: '/plantillas/editar/$slug'
+      path: '/plantillas/editar/$slug'
+      fullPath: '/plantillas/editar/$slug'
+      preLoaderRoute: typeof PlantillasEditarSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface CustomersCustomerIdRouteRouteChildren {
-  CustomersCustomerIdEditRoute: typeof CustomersCustomerIdEditRoute
-  CustomersCustomerIdIndexRoute: typeof CustomersCustomerIdIndexRoute
-}
-
-const CustomersCustomerIdRouteRouteChildren: CustomersCustomerIdRouteRouteChildren =
-  {
-    CustomersCustomerIdEditRoute: CustomersCustomerIdEditRoute,
-    CustomersCustomerIdIndexRoute: CustomersCustomerIdIndexRoute,
-  }
-
-const CustomersCustomerIdRouteRouteWithChildren =
-  CustomersCustomerIdRouteRoute._addFileChildren(
-    CustomersCustomerIdRouteRouteChildren,
-  )
-
-interface CustomersRouteRouteChildren {
-  CustomersCustomerIdRouteRoute: typeof CustomersCustomerIdRouteRouteWithChildren
-  CustomersAddNewRoute: typeof CustomersAddNewRoute
-  CustomersIndexRoute: typeof CustomersIndexRoute
-}
-
-const CustomersRouteRouteChildren: CustomersRouteRouteChildren = {
-  CustomersCustomerIdRouteRoute: CustomersCustomerIdRouteRouteWithChildren,
-  CustomersAddNewRoute: CustomersAddNewRoute,
-  CustomersIndexRoute: CustomersIndexRoute,
-}
-
-const CustomersRouteRouteWithChildren = CustomersRouteRoute._addFileChildren(
-  CustomersRouteRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CustomersRouteRoute: CustomersRouteRouteWithChildren,
+  PlantillasCrearRoute: PlantillasCrearRoute,
+  PlantillasIndexRoute: PlantillasIndexRoute,
+  PlantillasEditarSlugRoute: PlantillasEditarSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

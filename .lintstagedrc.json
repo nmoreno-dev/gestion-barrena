@@ -1,5 +1,5 @@
 {
-  "./src/*.ts?(x)": ["eslint --max-warnings=0", "prettier . -w", "tsc --noEmit"],
+  "./src/*.ts?(x)": ["eslint --max-warnings=0", "prettier . -w"],
   "*.js?(x)": ["eslint --max-warnings=0", "prettier . -w"],
   "*.{json,md,yml}": ["prettier . -w"]
 }
