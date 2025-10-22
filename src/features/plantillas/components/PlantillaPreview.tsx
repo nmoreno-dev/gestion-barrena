@@ -36,7 +36,15 @@ function PlantillaPreview({ name, body }: PlantillaPreviewProps) {
         value,
       );
     });
-    return preview;
+
+    // Sanitización básica: remover scripts y tags peligrosos
+    const cleanHtml = preview
+      .replace(/<script[^>]*>.*?<\/script>/gi, '')
+      .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+=/gi, '');
+
+    return cleanHtml;
   };
 
   return (
@@ -53,11 +61,19 @@ function PlantillaPreview({ name, body }: PlantillaPreviewProps) {
         <div className="bg-base-300 p-4 rounded-lg border-l-4 border-primary min-h-[200px]">
           <div className="prose max-w-none">
             <h4 className="text-base font-semibold mb-2 text-primary">{name || 'Sin nombre'}</h4>
-            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+            <div className="bg-white p-4 rounded border text-black">
               {body ? (
-                getPreviewText(body)
+                <div
+                  style={{
+                    fontFamily: 'Arial, sans-serif',
+                    fontSize: '14px',
+                    lineHeight: '1.6',
+                    color: '#000000',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: getPreviewText(body) }}
+                />
               ) : (
-                <span className="text-base-content/40 italic">
+                <span className="text-gray-400 italic">
                   El contenido aparecerá aquí mientras escribes...
                 </span>
               )}
