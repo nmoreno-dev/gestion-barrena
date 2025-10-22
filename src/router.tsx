@@ -4,9 +4,9 @@ import { QueryClient } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen';
 import { ErrorPage, NotFoundPage } from './common/components';
 
-const queryClient = new QueryClient();
+export function getRouter() {
+  const queryClient = new QueryClient();
 
-export function createRouter() {
   const router = routerWithQueryClient(
     createTanStackRouter({
       context: {
@@ -25,6 +25,6 @@ export function createRouter() {
 
 declare module '@tanstack/react-router' {
   interface Register {
-    router: ReturnType<typeof createRouter>;
+    router: ReturnType<typeof getRouter>;
   }
 }
