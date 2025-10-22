@@ -6,7 +6,8 @@ import {
   PlantillasEmptyState,
 } from './components';
 import { useNavigate } from '@tanstack/react-router';
-import { usePlantillas, useDeletePlantilla } from './queries/plantillasQueries';
+import { usePlantillas, useDeletePlantilla, useCreatePlantilla } from './queries/plantillasQueries';
+import { nameToSlug } from './utils/slugify';
 
 function Plantillas() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +16,7 @@ function Plantillas() {
   // Fetch plantillas from database
   const { data: plantillas = [], isLoading, isError, error } = usePlantillas();
   const deletePlantillaMutation = useDeletePlantilla();
+  const createPlantillaMutation = useCreatePlantilla();
 
   // Filtrar plantillas basado en el término de búsqueda
   const filteredPlantillas = plantillas.filter(plantilla =>
@@ -27,13 +29,28 @@ function Plantillas() {
   };
 
   const handleEditPlantilla = (id: string) => {
-    console.log('Editar plantilla:', id);
-    // TODO: Implementar navegación a página de edición
+    const plantilla = plantillas.find(p => p.id === id);
+    if (plantilla) {
+      const slug = nameToSlug(plantilla.name);
+      navigate({ to: '/plantillas/editar/$slug', params: { slug } });
+    }
   };
 
   const handleDeletePlantilla = (id: string) => {
     if (window.confirm('¿Estás seguro de que deseas eliminar esta plantilla?')) {
       deletePlantillaMutation.mutate(id);
+    }
+  };
+
+  const handleDuplicatePlantilla = (id: string) => {
+    const plantilla = plantillas.find(p => p.id === id);
+    if (plantilla) {
+      createPlantillaMutation.mutate({
+        name: `${plantilla.name} (copia)`,
+        subject: plantilla.subject,
+        body: plantilla.body,
+        bcc: plantilla.bcc,
+      });
     }
   };
 
@@ -100,6 +117,7 @@ function Plantillas() {
           plantillas={filteredPlantillas}
           onEdit={handleEditPlantilla}
           onDelete={handleDeletePlantilla}
+          onDuplicate={handleDuplicatePlantilla}
         />
       )}
     </div>

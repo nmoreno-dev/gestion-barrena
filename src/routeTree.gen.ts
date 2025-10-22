@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlantillasIndexRouteImport } from './routes/plantillas/index'
 import { Route as PlantillasCrearRouteImport } from './routes/plantillas/crear'
+import { Route as PlantillasEditarSlugRouteImport } from './routes/plantillas/editar.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,53 @@ const PlantillasCrearRoute = PlantillasCrearRouteImport.update({
   path: '/plantillas/crear',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlantillasEditarSlugRoute = PlantillasEditarSlugRouteImport.update({
+  id: '/plantillas/editar/$slug',
+  path: '/plantillas/editar/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas/': typeof PlantillasIndexRoute
+  '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/plantillas/crear' | '/plantillas'
+  fullPaths:
+    | '/'
+    | '/plantillas/crear'
+    | '/plantillas'
+    | '/plantillas/editar/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/plantillas/crear' | '/plantillas'
-  id: '__root__' | '/' | '/plantillas/crear' | '/plantillas/'
+  to: '/' | '/plantillas/crear' | '/plantillas' | '/plantillas/editar/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/plantillas/crear'
+    | '/plantillas/'
+    | '/plantillas/editar/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PlantillasCrearRoute: typeof PlantillasCrearRoute
   PlantillasIndexRoute: typeof PlantillasIndexRoute
+  PlantillasEditarSlugRoute: typeof PlantillasEditarSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlantillasCrearRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plantillas/editar/$slug': {
+      id: '/plantillas/editar/$slug'
+      path: '/plantillas/editar/$slug'
+      fullPath: '/plantillas/editar/$slug'
+      preLoaderRoute: typeof PlantillasEditarSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +115,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlantillasCrearRoute: PlantillasCrearRoute,
   PlantillasIndexRoute: PlantillasIndexRoute,
+  PlantillasEditarSlugRoute: PlantillasEditarSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

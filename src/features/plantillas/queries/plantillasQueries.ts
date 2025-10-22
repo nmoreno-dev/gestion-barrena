@@ -148,6 +148,46 @@ export function useDeletePlantilla() {
   });
 }
 
+/**
+ * Hook para duplicar una plantilla
+ */
+export function useDuplicatePlantilla() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const plantilla = await getPlantillaById(id);
+      if (!plantilla) {
+        throw new Error('Plantilla no encontrada');
+      }
+
+      // Crear una copia con "(copia)" en el nombre
+      const duplicatedPlantilla = await createPlantilla({
+        name: `${plantilla.name} (copia)`,
+        subject: plantilla.subject,
+        body: plantilla.body,
+        bcc: plantilla.bcc,
+      });
+
+      return duplicatedPlantilla;
+    },
+    onSuccess: (newPlantilla: Plantilla) => {
+      // Invalidar y refrescar la lista de plantillas
+      queryClient.invalidateQueries({
+        queryKey: plantillasQueryKeys.lists(),
+      });
+
+      // Agregar la nueva plantilla al cache
+      queryClient.setQueryData(plantillasQueryKeys.detail(newPlantilla.id), newPlantilla);
+
+      toast.success(`Plantilla "${newPlantilla.name}" duplicada exitosamente`);
+    },
+    onError: (error: Error) => {
+      toast.error(`Error al duplicar plantilla: ${error.message}`);
+    },
+  });
+}
+
 // ===== HELPERS =====
 
 /**

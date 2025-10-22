@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Edit, Trash2, Eye } from 'lucide-react';
+import { FileText, Edit, Trash2, Eye, Copy } from 'lucide-react';
 import PlantillaPreview from '../PlantillaPreview';
 
 interface Plantilla {
@@ -16,9 +16,10 @@ interface PlantillaCardProps {
   plantilla: Plantilla;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
 }
 
-export function PlantillaCard({ plantilla, onEdit, onDelete }: PlantillaCardProps) {
+export function PlantillaCard({ plantilla, onEdit, onDelete, onDuplicate }: PlantillaCardProps) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   return (
     <div className="card bg-base-100 shadow-sm border border-base-300 hover:shadow-md transition-shadow">
@@ -40,14 +41,15 @@ export function PlantillaCard({ plantilla, onEdit, onDelete }: PlantillaCardProp
             </div>
 
             {/* Preview del asunto */}
+            <div className="text-xs text-base-content/50 mb-1">ASUNTO:</div>
             <div className="bg-base-200 rounded-lg p-2 mb-2">
-              <div className="text-xs text-base-content/50 mb-1">ASUNTO:</div>
               <div className="text-sm font-medium text-base-content/80 line-clamp-1">
                 {plantilla.subject}
               </div>
             </div>
 
             {/* Preview del contenido */}
+            <div className="text-xs text-base-content/50 mb-1">CONTENIDO:</div>
             <div className="bg-base-200 rounded-lg p-3 mb-4">
               <div className="text-sm text-base-content/70 line-clamp-2">
                 {plantilla.body.substring(0, 150)}
@@ -74,7 +76,7 @@ export function PlantillaCard({ plantilla, onEdit, onDelete }: PlantillaCardProp
           </div>
 
           {/* Acciones */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 items-start">
             <button className="btn btn-ghost btn-sm gap-2" onClick={() => setIsPreviewOpen(true)}>
               <Eye size={14} />
               Vista Previa
@@ -82,6 +84,13 @@ export function PlantillaCard({ plantilla, onEdit, onDelete }: PlantillaCardProp
             <button className="btn btn-ghost btn-sm gap-2" onClick={() => onEdit(plantilla.id)}>
               <Edit size={14} />
               Editar
+            </button>
+            <button
+              className="btn btn-ghost btn-sm gap-2"
+              onClick={() => onDuplicate(plantilla.id)}
+            >
+              <Copy size={14} />
+              Duplicar
             </button>
             <button
               className="btn btn-ghost btn-sm gap-2 text-error hover:bg-error/10"

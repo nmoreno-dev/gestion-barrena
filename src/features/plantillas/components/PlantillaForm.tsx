@@ -1,36 +1,50 @@
 import { useNavigate } from '@tanstack/react-router';
 import { ArrowLeft, FileText } from 'lucide-react';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useAppForm, fieldContext, formContext } from '@/common/hooks';
 import { SubmitButton } from '@/common/components/Form/Atoms/SubmitButton';
 import TextField from '@/common/components/Form/Atoms/TextInput';
-import { useCreatePlantilla } from '../queries/plantillasQueries';
 import { AVAILABLE_TEMPLATE_VARIABLES } from '../interfaces/plantilla';
-import type { CreatePlantillaData } from '../interfaces/plantilla';
+import type { CreatePlantillaData, Plantilla } from '../interfaces/plantilla';
 import PlantillaPreview from './PlantillaPreview';
 import { PlantillasAccordion } from './PlantillasAccordion';
 
-function PlantillaForm() {
+interface PlantillaFormProps {
+  mode: 'create' | 'edit';
+  initialData?: Plantilla;
+  onSubmit: (data: CreatePlantillaData) => Promise<void>;
+}
+
+function PlantillaForm({ mode, initialData, onSubmit }: PlantillaFormProps) {
   const navigate = useNavigate();
-  const createPlantillaMutation = useCreatePlantilla();
   const lastFocusedField = useRef<'subject' | 'body'>('body');
 
   const form = useAppForm({
     defaultValues: {
-      name: '',
-      subject: '',
-      body: '',
-      bcc: [],
+      name: initialData?.name || '',
+      subject: initialData?.subject || '',
+      body: initialData?.body || '',
+      bcc: initialData?.bcc || [],
     } as CreatePlantillaData,
     onSubmit: async ({ value }: { value: CreatePlantillaData }) => {
       try {
-        await createPlantillaMutation.mutateAsync(value);
+        await onSubmit(value);
         navigate({ to: '/plantillas' });
       } catch (error) {
-        console.error('Error al crear plantilla:', error);
+        console.error(`Error al ${mode === 'create' ? 'crear' : 'actualizar'} plantilla:`, error);
       }
     },
   });
+
+  // Actualizar valores del formulario cuando cambien los datos iniciales
+  useEffect(() => {
+    if (initialData) {
+      form.setFieldValue('name', initialData.name);
+      form.setFieldValue('subject', initialData.subject);
+      form.setFieldValue('body', initialData.body);
+      form.setFieldValue('bcc', initialData.bcc || []);
+    }
+  }, [initialData]);
 
   // Insertar variable en el campo que tuvo el foco por última vez
   const insertVariable = (variable: string) => {
@@ -67,9 +81,13 @@ function PlantillaForm() {
             Volver
           </button>
           <div>
-            <h1 className="text-3xl font-bold">Nueva Plantilla</h1>
+            <h1 className="text-3xl font-bold">
+              {mode === 'create' ? 'Nueva Plantilla' : 'Editar Plantilla'}
+            </h1>
             <p className="text-base-content/60">
-              Crea una nueva plantilla de mensaje personalizable
+              {mode === 'create'
+                ? 'Crea una nueva plantilla de mensaje personalizable'
+                : 'Modifica los datos de tu plantilla existente'}
             </p>
           </div>
         </div>
@@ -304,7 +322,9 @@ function PlantillaForm() {
               </div>
 
               <div className="flex gap-4">
-                <SubmitButton label="Guardar Plantilla" />
+                <SubmitButton
+                  label={mode === 'create' ? 'Guardar Plantilla' : 'Actualizar Plantilla'}
+                />
                 <button
                   type="button"
                   className="btn btn-outline flex-1"
