@@ -44,7 +44,9 @@ export function usePlantillasForDeudores() {
   return useQuery({
     queryKey: ['plantillas-for-deudores'],
     queryFn: getPlantillasForDeudores,
-    staleTime: 1000 * 60 * 5, // 5 minutos
+    staleTime: 0, // Siempre revalidar para mantener sincronizado con las plantillas creadas
     gcTime: 1000 * 60 * 10, // 10 minutos
+    refetchOnMount: true, // Refetch cuando el componente se monta
+    refetchOnWindowFocus: true, // Refetch cuando la ventana recupera el foco
   });
 }

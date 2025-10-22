@@ -144,18 +144,20 @@ const TablaDeudores = ({
       title: 'Acciones',
       width: 120,
       render: deudor => {
-        // Si hay plantilla seleccionada, usar esa
+        // Usar plantilla seleccionada o la primera disponible, fallback a template por defecto
         let bcc: string[];
         let subject: string;
         let message: string;
 
-        if (selectedPlantilla) {
-          const processed = processPlantillaForDeudor(selectedPlantilla, deudor);
+        const plantillaToUse = selectedPlantilla || (plantillas.length > 0 ? plantillas[0] : null);
+
+        if (plantillaToUse) {
+          const processed = processPlantillaForDeudor(plantillaToUse, deudor);
           bcc = processed.bcc;
           subject = processed.subject;
           message = processed.body;
         } else {
-          // Fallback al template por defecto
+          // Fallback al template por defecto solo si no hay plantillas
           bcc = ['micaelarecabarren94@gmail.com'];
           subject = `${deudor.nombre} - PRESTAMOS EN ATRASO ⚠️ - ADELANTOS.COM - TEM`;
           message = createMessage(deudor);
@@ -211,10 +213,9 @@ const TablaDeudores = ({
             ) : (
               <select
                 className="select select-bordered select-sm w-full md:w-64"
-                value={selectedPlantillaId || ''}
-                onChange={e => onPlantillaChange?.(e.target.value || null)}
+                value={selectedPlantillaId || plantillas[0]?.id || ''}
+                onChange={e => onPlantillaChange?.(e.target.value)}
               >
-                <option value="">Template por defecto</option>
                 {plantillas.map(plantilla => (
                   <option key={plantilla.id} value={plantilla.id}>
                     {plantilla.name}

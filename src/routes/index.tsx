@@ -28,6 +28,13 @@ function HomePage() {
   // Cargar plantillas disponibles
   const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
 
+  // Seleccionar automáticamente la primera plantilla cuando se cargan
+  useEffect(() => {
+    if (plantillas.length > 0 && !selectedPlantillaId) {
+      setSelectedPlantillaId(plantillas[0].id);
+    }
+  }, [plantillas, selectedPlantillaId]);
+
   // Cargar datos de IndexedDB al iniciar
   useEffect(() => {
     const loadStoredData = async () => {
