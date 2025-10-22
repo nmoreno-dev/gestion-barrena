@@ -1,6 +1,6 @@
 // src/components/form/SubmitButton.tsx
 
-import { useRouter } from 'next/navigation';
+import { useNavigate } from '@tanstack/react-router';
 import Button from '../../Button';
 
 interface CancelButtonProps {
@@ -8,11 +8,11 @@ interface CancelButtonProps {
   onClick?: () => void;
 }
 
-const CancelButton: React.FC<CancelButtonProps> = ({ label = 'Cancelar', onClick }) => {
-  const router = useRouter();
+const CancelButton = ({ label = 'Cancelar', onClick = undefined }: CancelButtonProps) => {
+  const navigate = useNavigate();
 
   const handleCancel = () => {
-    router.back();
+    navigate({ to: '..' });
   };
 
   return (

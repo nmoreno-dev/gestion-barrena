@@ -1,6 +1,6 @@
 import React, { InputHTMLAttributes } from 'react';
-import { useFieldContext } from '@/hooks';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { useFieldContext } from '@/common/hooks';
 
 // Definimos variantes de estilo para el Input usando CVA
 const inputStyles = cva(

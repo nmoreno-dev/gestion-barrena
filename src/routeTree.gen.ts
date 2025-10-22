@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlantillasIndexRouteImport } from './routes/plantillas/index'
+import { Route as PlantillasCrearRouteImport } from './routes/plantillas/crear'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,30 +23,39 @@ const PlantillasIndexRoute = PlantillasIndexRouteImport.update({
   path: '/plantillas/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlantillasCrearRoute = PlantillasCrearRouteImport.update({
+  id: '/plantillas/crear',
+  path: '/plantillas/crear',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas': typeof PlantillasIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas': typeof PlantillasIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/plantillas/crear': typeof PlantillasCrearRoute
   '/plantillas/': typeof PlantillasIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/plantillas'
+  fullPaths: '/' | '/plantillas/crear' | '/plantillas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/plantillas'
-  id: '__root__' | '/' | '/plantillas/'
+  to: '/' | '/plantillas/crear' | '/plantillas'
+  id: '__root__' | '/' | '/plantillas/crear' | '/plantillas/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  PlantillasCrearRoute: typeof PlantillasCrearRoute
   PlantillasIndexRoute: typeof PlantillasIndexRoute
 }
 
@@ -65,11 +75,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlantillasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/plantillas/crear': {
+      id: '/plantillas/crear'
+      path: '/plantillas/crear'
+      fullPath: '/plantillas/crear'
+      preLoaderRoute: typeof PlantillasCrearRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  PlantillasCrearRoute: PlantillasCrearRoute,
   PlantillasIndexRoute: PlantillasIndexRoute,
 }
 export const routeTree = rootRouteImport
