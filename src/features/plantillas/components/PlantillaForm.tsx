@@ -213,8 +213,8 @@ function PlantillaForm() {
                         />
                         <label className="label">
                           <span className="label-text-alt text-gray-500 text-wrap">
-                            El asunto que aparecerá en el correo electrónico. Puedes usar variables
-                            haciendo clic en ellas con el cursor en este campo.
+                            El asunto que aparecerá en el correo electrónico. Haz clic en cualquier
+                            variable para insertarla automáticamente.
                           </span>
                         </label>
                         {field.state.meta.errors.length > 0 && field.state.meta.isTouched && (
@@ -294,7 +294,7 @@ function PlantillaForm() {
                       ))}
                     </div>
                     <label className="label">
-                      <span className="label-text-alt text-gray-500">
+                      <span className="label-text-alt text-gray-500 text-wrap">
                         Haz clic en cualquier variable para insertarla en el Asunto o Contenido
                         según dónde esté el cursor
                       </span>
@@ -304,7 +304,7 @@ function PlantillaForm() {
               </div>
 
               <div className="flex gap-4">
-                <SubmitButton label="Crear Plantilla" />
+                <SubmitButton label="Guardar Plantilla" />
                 <button
                   type="button"
                   className="btn btn-outline flex-1"

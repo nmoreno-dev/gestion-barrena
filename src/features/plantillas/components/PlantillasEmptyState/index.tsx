@@ -17,7 +17,7 @@ export function PlantillasEmptyState({ onCreateFirst }: PlantillasEmptyStateProp
         <p className="text-base-content/60 mb-6">
           Comienza creando tu primera plantilla de mensaje usando las variables disponibles
         </p>
-        <button className="btn btn-primary gap-2" onClick={onCreateFirst}>
+        <button className="self-center btn btn-primary gap-2 w-2xl" onClick={onCreateFirst}>
           <Plus size={16} />
           Crear Primera Plantilla
         </button>

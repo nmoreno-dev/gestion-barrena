@@ -49,7 +49,7 @@ function PlantillaPreview({ name, subject, body }: PlantillaPreviewProps) {
   };
 
   return (
-    <div className="card bg-base-200 sticky top-6">
+    <div className="card bg-base-200">
       <div className="card-body">
         <h3 className="card-title text-lg">
           <Eye className="w-5 h-5" />
@@ -102,21 +102,11 @@ function PlantillaPreview({ name, subject, body }: PlantillaPreviewProps) {
           <div className="text-sm text-base-content/60">
             <span className="font-medium">Variables de ejemplo:</span>
             <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
-              <li>
-                <code className="text-primary">[DEUDOR_NOMBRE]</code> → ABAD MARCELA YAMILA
-              </li>
-              <li>
-                <code className="text-primary">[DEUDOR_CUIL]</code> → 27-27176013-8
-              </li>
-              <li>
-                <code className="text-primary">[DEUDA_ACTUAL]</code> → $44.863,77
-              </li>
-              <li>
-                <code className="text-primary">[ACREEDOR_BANCO]</code> → BANCO INDUSTRIAL S.A.
-              </li>
-              <li>
-                <code className="text-primary">[ACREEDOR_ALIAS]</code> → ADELANTOSPAY
-              </li>
+              {Object.entries(EXAMPLE_DATA).map(([variable, value]) => (
+                <li key={variable}>
+                  <code className="text-primary">{variable}</code> → {value}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

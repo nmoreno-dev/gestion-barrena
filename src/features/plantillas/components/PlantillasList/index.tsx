@@ -1,12 +1,5 @@
 import { PlantillaCard } from '../PlantillaCard';
-
-interface Plantilla {
-  id: string;
-  name: string;
-  body: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { Plantilla } from '../../interfaces/plantilla';
 
 interface PlantillasListProps {
   plantillas: Plantilla[];

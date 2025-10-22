@@ -6,38 +6,18 @@ import {
   PlantillasEmptyState,
 } from './components';
 import { useNavigate } from '@tanstack/react-router';
-
-// Mock data para la UI
-const mockPlantillas = [
-  {
-    id: '1',
-    name: 'Recordatorio de Pago',
-    body: 'Estimado [DEUDOR_NOMBRE], le recordamos que tiene una deuda pendiente de [DEUDA_ACTUAL]...',
-    createdAt: new Date('2024-10-15'),
-    updatedAt: new Date('2024-10-20'),
-  },
-  {
-    id: '2',
-    name: 'Notificación Legal',
-    body: 'Sr./Sra. [DEUDOR_NOMBRE], CUIL: [DEUDOR_CUIL], nos dirigimos a usted para informarle...',
-    createdAt: new Date('2024-10-10'),
-    updatedAt: new Date('2024-10-18'),
-  },
-  {
-    id: '3',
-    name: 'Propuesta de Cancelación',
-    body: 'Le ofrecemos la posibilidad de cancelar su deuda de [DEUDA_CANCELATORIA] mediante...',
-    createdAt: new Date('2024-10-08'),
-    updatedAt: new Date('2024-10-16'),
-  },
-];
+import { usePlantillas, useDeletePlantilla } from './queries/plantillasQueries';
 
 function Plantillas() {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
+  // Fetch plantillas from database
+  const { data: plantillas = [], isLoading, isError, error } = usePlantillas();
+  const deletePlantillaMutation = useDeletePlantilla();
+
   // Filtrar plantillas basado en el término de búsqueda
-  const filteredPlantillas = mockPlantillas.filter(plantilla =>
+  const filteredPlantillas = plantillas.filter(plantilla =>
     plantilla.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
@@ -48,15 +28,56 @@ function Plantillas() {
 
   const handleEditPlantilla = (id: string) => {
     console.log('Editar plantilla:', id);
+    // TODO: Implementar navegación a página de edición
   };
 
   const handleDeletePlantilla = (id: string) => {
-    console.log('Eliminar plantilla:', id);
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta plantilla?')) {
+      deletePlantillaMutation.mutate(id);
+    }
   };
 
   const handlePreviewPlantilla = (id: string) => {
     console.log('Vista previa plantilla:', id);
+    // TODO: Implementar modal de vista previa
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-6">
+        <PlantillasHeader onCreateClick={handleCreatePlantilla} />
+        <div className="flex justify-center items-center py-20">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="w-full space-y-6">
+        <PlantillasHeader onCreateClick={handleCreatePlantilla} />
+        <div className="alert alert-error">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>Error al cargar las plantillas: {error?.message}</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-6">
