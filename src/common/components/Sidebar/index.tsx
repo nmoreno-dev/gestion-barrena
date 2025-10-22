@@ -42,7 +42,7 @@ export function Sidebar({ children }: SidebarProps) {
 
         {/* Navegación del sidebar */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="menu bg-base-200 space-y-2">
+          <ul className="menu w-full bg-base-200 space-y-2">
             {navigationItems.map(item => {
               const IconComponent = item.icon;
               return (
