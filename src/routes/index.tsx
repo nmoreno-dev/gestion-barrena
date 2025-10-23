@@ -1,190 +1,75 @@
-import { TablaDeudores } from '@/features/deudores/components';
-import CsvLoader from '@/features/deudores/components/CSVLoader';
-import { Deudor } from '@/features/deudores/interfaces/deudor';
-import { createFileRoute } from '@tanstack/react-router';
-import { useState, useEffect } from 'react';
-import {
-  loadDeudoresFromStorage,
-  saveDeudoresToStorage,
-  clearStoredDeudores,
-  formatLoadDate,
-} from '@/features/deudores/utils';
-import { toast } from '@/utils/toast';
-import { usePlantillasForDeudores } from '@/common/hooks';
+import { createFileRoute, Link } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/')({
   component: HomePage,
 });
 
 function HomePage() {
-  const [deudores, setDeudores] = useState<Deudor[]>([]);
-  const [hasStoredData, setHasStoredData] = useState(false);
-  const [lastLoadDate, setLastLoadDate] = useState<Date | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
-  const [showClearModal, setShowClearModal] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
-
-  // Cargar plantillas disponibles
-  const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
-
-  // Seleccionar automáticamente la primera plantilla cuando se cargan
-  useEffect(() => {
-    if (plantillas.length > 0 && !selectedPlantillaId) {
-      setSelectedPlantillaId(plantillas[0].id);
-    }
-  }, [plantillas, selectedPlantillaId]);
-
-  // Cargar datos de IndexedDB al iniciar
-  useEffect(() => {
-    const loadStoredData = async () => {
-      try {
-        const storedData = await loadDeudoresFromStorage();
-        if (storedData) {
-          setDeudores(storedData.deudores);
-          setHasStoredData(true);
-          setLastLoadDate(new Date(storedData.loadDate));
-          setFileName(storedData.fileName);
-          toast.success(`Cargados ${storedData.deudores.length} registros desde IndexedDB`);
-        } else {
-          setHasStoredData(false);
-          setLastLoadDate(null);
-          setFileName(null);
-        }
-      } catch (error) {
-        console.error('Error al cargar datos:', error);
-        toast.error('Error al cargar datos guardados');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStoredData();
-  }, []);
-
-  const handleDataLoaded = async (data: Deudor[], uploadedFileName: string) => {
-    try {
-      // Guardar en IndexedDB automáticamente
-      await saveDeudoresToStorage(data, uploadedFileName);
-      setDeudores(data);
-      setHasStoredData(true);
-      setLastLoadDate(new Date());
-      setFileName(uploadedFileName);
-      toast.success(`Archivo cargado y guardado: ${data.length} registros`);
-    } catch (error) {
-      console.error('Error al guardar datos:', error);
-      toast.error('Archivo cargado pero no se pudo guardar localmente');
-      setDeudores(data);
-    }
-  };
-
-  const handleClearData = async () => {
-    try {
-      await clearStoredDeudores();
-      setDeudores([]);
-      setHasStoredData(false);
-      setLastLoadDate(null);
-      setFileName(null);
-      setShowClearModal(false);
-      toast.success('Datos eliminados correctamente');
-    } catch (error) {
-      console.error('Error al eliminar datos:', error);
-      toast.error('Error al eliminar los datos');
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body">
-            <div className="flex justify-center items-center py-8">
-              <span className="loading loading-spinner loading-lg"></span>
-              <span className="ml-2">Cargando datos...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full  space-y-4">
-      <div className="card w-full  bg-base-100 shadow-sm">
-        <div className="card-body gap-4">
-          <div className="flex justify-between items-center flex-col md:flex-row">
-            <h2 className="card-title mb-4 md:mb-0 text-2xl">Gestión de Deudores</h2>
-            {hasStoredData && (
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-2 flex-col sm:flex-row">
-                  {lastLoadDate && (
-                    <div className="text-gray-500 wrap-anywhere">
-                      <div>
-                        <strong>Archivo:</strong> {fileName || 'Sin nombre'}
-                      </div>
-                      <div>
-                        <strong>Cargado:</strong>{' '}
-                        <span className="font-medium">{formatLoadDate(lastLoadDate)}</span>
-                      </div>
-                    </div>
-                  )}
-                  <button className="btn btn-warning" onClick={() => setShowClearModal(true)}>
-                    🗑️ Eliminar Datos
-                  </button>
-                </div>
-              </div>
-            )}
+    <div className="w-full space-y-6">
+      <div className="hero bg-base-200 rounded-box">
+        <div className="hero-content text-center py-12">
+          <div className="max-w-md">
+            <h1 className="text-5xl font-bold">Gestión Barrena</h1>
+            <p className="py-6">
+              Sistema de gestión financiera para el manejo de deudores y plantillas de comunicación.
+            </p>
           </div>
-
-          {!hasStoredData ? (
-            <CsvLoader onDataLoaded={handleDataLoaded} />
-          ) : (
-            <div className="alert alert-info">
-              <div className="flex justify-between items-center w-full">
-                <div>
-                  <div className="wrap-anywhere">
-                    Tienes {deudores.length} registros cargados del archivo{' '}
-                    <strong>{fileName}</strong>. Para cargar un nuevo archivo, primero debes
-                    eliminar los datos actuales.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      <TablaDeudores
-        deudores={deudores}
-        plantillas={plantillas}
-        selectedPlantillaId={selectedPlantillaId}
-        onPlantillaChange={setSelectedPlantillaId}
-        isLoadingPlantillas={isLoadingPlantillas}
-      />
-
-      {/* Modal de confirmación para eliminar datos */}
-      {showClearModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">⚠️ Confirmar eliminación</h3>
-            <p className="py-4">
-              ¿Estás seguro de que quieres eliminar todos los datos cargados?
-              <br />
-              <span className="text-warning font-medium">
-                Esta acción no se puede deshacer y perderás {deudores.length} registros.
-              </span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Card Deudores */}
+        <Link
+          to="/deudores"
+          className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow"
+        >
+          <div className="card-body">
+            <h2 className="card-title text-2xl">
+              <span className="text-3xl">👥</span>
+              Deudores
+            </h2>
+            <p>
+              Gestiona la información de deudores, carga archivos CSV y visualiza datos en tablas
+              interactivas.
             </p>
-            <div className="modal-action">
-              <button className="btn btn-ghost" onClick={() => setShowClearModal(false)}>
-                Cancelar
-              </button>
-              <button className="btn btn-error" onClick={handleClearData}>
-                Eliminar Datos
-              </button>
+            <div className="card-actions justify-end mt-4">
+              <button className="btn btn-primary">Ir a Deudores</button>
             </div>
           </div>
+        </Link>
+
+        {/* Card Plantillas */}
+        <Link
+          to="/plantillas"
+          className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow"
+        >
+          <div className="card-body">
+            <h2 className="card-title text-2xl">
+              <span className="text-3xl">📄</span>
+              Plantillas
+            </h2>
+            <p>Crea y administra plantillas de comunicación personalizadas para tus deudores.</p>
+            <div className="card-actions justify-end mt-4">
+              <button className="btn btn-primary">Ir a Plantillas</button>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Info adicional */}
+      <div className="card bg-base-100 shadow-sm">
+        <div className="card-body">
+          <h3 className="card-title text-lg">Características del Sistema</h3>
+          <ul className="list-disc list-inside space-y-2 text-base-content/80">
+            <li>Importación de datos mediante archivos CSV</li>
+            <li>Almacenamiento local con IndexedDB</li>
+            <li>Gestión de plantillas de comunicación</li>
+            <li>Visualización y filtrado de información</li>
+            <li>Interfaz moderna y responsive</li>
+          </ul>
         </div>
-      )}
+      </div>
     </div>
   );
 }
