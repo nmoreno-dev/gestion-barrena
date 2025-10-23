@@ -6,13 +6,14 @@
  */
 
 export const DB_NAME = 'GestionBarrenaDB';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 /**
  * Definición de los object stores de la aplicación
  */
 export const STORES = {
-  DEUDORES: 'deudores',
+  DEUDORES_COLLECTIONS: 'deudores_collections',
+  DEUDORES_DATA: 'deudores_data',
   PLANTILLAS: 'plantillas',
 } as const;
 
@@ -35,26 +36,34 @@ interface StoreConfig {
 }
 
 /**
- * Definición de stores por versión para facilitar migraciones
+ * Definición de todos los stores de la aplicación
  */
-const STORE_CONFIGS: Record<number, StoreConfig[]> = {
-  1: [
-    {
-      name: STORES.DEUDORES,
-      keyPath: 'id',
-    },
-  ],
-  2: [
-    {
-      name: STORES.PLANTILLAS,
-      keyPath: 'id',
-      indexes: [
-        { name: 'name', keyPath: 'name', options: { unique: false } },
-        { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
-      ],
-    },
-  ],
-};
+const STORE_CONFIGS: StoreConfig[] = [
+  {
+    name: STORES.DEUDORES_COLLECTIONS,
+    keyPath: 'id',
+    indexes: [
+      { name: 'order', keyPath: 'order', options: { unique: false } },
+      { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
+    ],
+  },
+  {
+    name: STORES.DEUDORES_DATA,
+    keyPath: 'id',
+    indexes: [
+      { name: 'collectionId', keyPath: 'collectionId', options: { unique: false } },
+      { name: 'cuil', keyPath: 'cuil', options: { unique: false } },
+    ],
+  },
+  {
+    name: STORES.PLANTILLAS,
+    keyPath: 'id',
+    indexes: [
+      { name: 'name', keyPath: 'name', options: { unique: false } },
+      { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
+    ],
+  },
+];
 
 /**
  * Instancia singleton de la conexión a la base de datos
@@ -110,22 +119,22 @@ export function openDB(): Promise<IDBDatabase> {
       resolve(dbInstance);
     };
 
-    request.onupgradeneeded = event => {
+    request.onupgradeneeded = () => {
       const db = request.result;
-      const oldVersion = (event as IDBVersionChangeEvent).oldVersion;
 
-      console.log(`Migrando base de datos de versión ${oldVersion} a ${DB_VERSION}`);
+      console.log(`Inicializando base de datos versión ${DB_VERSION}`);
 
-      // Aplicar migraciones incrementales
-      for (let version = oldVersion + 1; version <= DB_VERSION; version++) {
-        const storeConfigs = STORE_CONFIGS[version];
+      // Eliminar todos los stores existentes para partir limpio
+      const existingStores = Array.from(db.objectStoreNames);
+      existingStores.forEach(storeName => {
+        db.deleteObjectStore(storeName);
+        console.log(`✓ Object store '${storeName}' eliminado`);
+      });
 
-        if (storeConfigs) {
-          storeConfigs.forEach(config => createStore(db, config));
-        }
-      }
+      // Crear todos los stores necesarios
+      STORE_CONFIGS.forEach(config => createStore(db, config));
 
-      console.log('Migración completada con éxito');
+      console.log('Base de datos inicializada con éxito');
     };
 
     request.onblocked = () => {

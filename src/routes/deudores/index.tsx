@@ -1,11 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { DeudoresTabs, TablaDeudores } from '@/features/deudores/components';
 import CsvLoader from '@/features/deudores/components/CSVLoader';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
-  useDeudoresInfo,
-  useSaveDeudores,
-  useClearDeudores,
+  useDeudoresCollections,
+  useCollectionInfo,
+  useSaveDeudoresToCollection,
+  useDeleteCollection,
+  useCreateCollection,
   formatLoadDate,
   Deudor,
 } from '@/features/deudores';
@@ -15,21 +17,51 @@ export const Route = createFileRoute('/deudores/')({
   component: DeudoresPage,
 });
 
+const DEFAULT_COLLECTION_NAME = 'Principal';
+
 function DeudoresPage() {
   const [showClearModal, setShowClearModal] = useState(false);
   const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
+  const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
+  const hasInitialized = useRef(false);
 
+  // Obtener todas las colecciones
+  const { data: collections = [], isLoading: isLoadingCollections } = useDeudoresCollections();
+
+  // Obtener datos de la colección actual
   const {
+    collection,
     deudores,
-    hasData: hasStoredData,
+    hasData,
     loadDate: lastLoadDate,
     fileName,
     isLoading: isLoadingDeudores,
-  } = useDeudoresInfo();
-  const saveMutation = useSaveDeudores();
-  const clearMutation = useClearDeudores();
+  } = useCollectionInfo(currentCollectionId);
+
+  const saveMutation = useSaveDeudoresToCollection();
+  const clearMutation = useDeleteCollection();
+  const createMutation = useCreateCollection();
 
   const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
+
+  // Efecto para crear colección inicial o seleccionar la primera
+  useEffect(() => {
+    if (!isLoadingCollections && !currentCollectionId && !hasInitialized.current) {
+      hasInitialized.current = true;
+
+      if (collections.length === 0) {
+        // Crear colección inicial
+        createMutation.mutate(DEFAULT_COLLECTION_NAME, {
+          onSuccess: collectionId => {
+            setCurrentCollectionId(collectionId);
+          },
+        });
+      } else {
+        // Seleccionar la primera colección
+        setCurrentCollectionId(collections[0].id);
+      }
+    }
+  }, [collections, isLoadingCollections, currentCollectionId, createMutation]);
 
   useEffect(() => {
     if (plantillas.length > 0 && !selectedPlantillaId) {
@@ -38,18 +70,40 @@ function DeudoresPage() {
   }, [plantillas, selectedPlantillaId]);
 
   const handleDataLoaded = async (data: Deudor[], uploadedFileName: string) => {
-    saveMutation.mutate({ deudores: data, fileName: uploadedFileName });
+    if (!currentCollectionId) return;
+
+    saveMutation.mutate({
+      collectionId: currentCollectionId,
+      deudores: data,
+      fileName: uploadedFileName,
+    });
   };
 
   const handleClearData = async () => {
-    clearMutation.mutate(undefined, {
+    if (!currentCollectionId) return;
+
+    clearMutation.mutate(currentCollectionId, {
       onSuccess: () => {
         setShowClearModal(false);
+        // Si era la única colección, crear una nueva
+        if (collections.length === 1) {
+          createMutation.mutate(DEFAULT_COLLECTION_NAME, {
+            onSuccess: collectionId => {
+              setCurrentCollectionId(collectionId);
+            },
+          });
+        } else {
+          // Seleccionar otra colección
+          const otherCollection = collections.find(c => c.id !== currentCollectionId);
+          if (otherCollection) {
+            setCurrentCollectionId(otherCollection.id);
+          }
+        }
       },
     });
   };
 
-  if (isLoadingDeudores) {
+  if (isLoadingDeudores || isLoadingCollections) {
     return (
       <div className="container mx-auto p-4">
         <div className="card bg-base-100 shadow-xl">
@@ -69,8 +123,10 @@ function DeudoresPage() {
       <div className="card w-full bg-base-100 shadow-sm">
         <div className="card-body gap-4">
           <div className="flex justify-between items-center flex-col md:flex-row">
-            <h2 className="card-title mb-4 md:mb-0 text-2xl">Gestión de Deudores</h2>
-            {hasStoredData && (
+            <h2 className="card-title mb-4 md:mb-0 text-2xl">
+              Gestión de Deudores {collection && `- ${collection.name}`}
+            </h2>
+            {hasData && (
               <div className="flex flex-col items-end gap-2">
                 <div className="flex items-center gap-2 flex-col sm:flex-row">
                   {lastLoadDate && (
@@ -92,7 +148,7 @@ function DeudoresPage() {
             )}
           </div>
 
-          {!hasStoredData ? (
+          {!hasData ? (
             <CsvLoader onDataLoaded={handleDataLoaded} />
           ) : (
             <div className="alert alert-info">

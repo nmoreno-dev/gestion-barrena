@@ -1,124 +1,161 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/utils/toast';
 import {
-  getDeudores,
-  saveDeudores,
-  updateDeudores,
-  clearDeudores,
-  getDeudoresStats,
-  StoredDeudoresData,
-} from '../api/deudoresApi';
+  getCollections,
+  getCollectionById,
+  createCollection,
+  getDeudoresByCollection,
+  saveDeudoresToCollection,
+  deleteCollection,
+  updateCollectionName,
+} from '../api/deudoresCollectionsApi';
 import { Deudor } from '../interfaces/deudor';
 
 // Query Keys
 export const deudoresQueryKeys = {
   all: ['deudores'] as const,
-  lists: () => [...deudoresQueryKeys.all, 'list'] as const,
-  list: () => [...deudoresQueryKeys.lists()] as const,
-  stats: () => [...deudoresQueryKeys.all, 'stats'] as const,
+  collections: () => [...deudoresQueryKeys.all, 'collections'] as const,
+  collection: (id: string) => [...deudoresQueryKeys.all, 'collection', id] as const,
+  collectionData: (id: string) => [...deudoresQueryKeys.all, 'data', id] as const,
 };
 
-// ===== QUERIES =====
+// ===== QUERIES - COLLECTIONS =====
 
 /**
- * Hook para obtener todos los deudores almacenados
+ * Hook para obtener todas las colecciones de deudores
  */
-export function useDeudores() {
+export function useDeudoresCollections() {
   return useQuery({
-    queryKey: deudoresQueryKeys.list(),
-    queryFn: getDeudores,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-    gcTime: 1000 * 60 * 10, // 10 minutos
-  });
-}
-
-/**
- * Hook para obtener estadísticas de los deudores
- */
-export function useDeudoresStats() {
-  return useQuery({
-    queryKey: deudoresQueryKeys.stats(),
-    queryFn: getDeudoresStats,
+    queryKey: deudoresQueryKeys.collections(),
+    queryFn: getCollections,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
   });
 }
 
-// ===== MUTATIONS =====
+/**
+ * Hook para obtener una colección específica
+ */
+export function useDeudorCollection(collectionId: string | null) {
+  return useQuery({
+    queryKey: deudoresQueryKeys.collection(collectionId || ''),
+    queryFn: () => (collectionId ? getCollectionById(collectionId) : null),
+    enabled: !!collectionId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+}
 
 /**
- * Hook para guardar/cargar nuevos deudores desde CSV
+ * Hook para obtener los deudores de una colección
  */
-export function useSaveDeudores() {
+export function useDeudoresByCollection(collectionId: string | null) {
+  return useQuery({
+    queryKey: deudoresQueryKeys.collectionData(collectionId || ''),
+    queryFn: () => (collectionId ? getDeudoresByCollection(collectionId) : []),
+    enabled: !!collectionId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+}
+
+// ===== MUTATIONS - COLLECTIONS =====
+
+/**
+ * Hook para crear una nueva colección
+ */
+export function useCreateCollection() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ deudores, fileName }: { deudores: Deudor[]; fileName: string }) =>
-      saveDeudores(deudores, fileName),
-    onSuccess: (data: StoredDeudoresData) => {
-      // Invalidar y refrescar los datos de deudores
+    mutationFn: (name: string) => createCollection(name),
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: deudoresQueryKeys.all,
+        queryKey: deudoresQueryKeys.collections(),
       });
-
-      // Actualizar el cache directamente
-      queryClient.setQueryData(deudoresQueryKeys.list(), data);
-
-      toast.success(`Archivo cargado y guardado: ${data.totalRecords} registros`);
+      toast.success('Nueva tabla creada');
     },
     onError: (error: Error) => {
+      toast.error(`Error al crear tabla: ${error.message}`);
+    },
+  });
+}
+
+/**
+ * Hook para guardar deudores en una colección
+ */
+export function useSaveDeudoresToCollection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      collectionId,
+      deudores,
+      fileName,
+    }: {
+      collectionId: string;
+      deudores: Deudor[];
+      fileName: string;
+    }) => saveDeudoresToCollection(collectionId, deudores, fileName),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collection(variables.collectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collectionData(variables.collectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collections(),
+      });
+      toast.success(`Archivo cargado: ${variables.deudores.length} registros`);
+    },
+    onError: (error: Error) => {
+      console.error(error);
       toast.error(`Error al guardar deudores: ${error.message}`);
     },
   });
 }
 
 /**
- * Hook para actualizar la lista de deudores
+ * Hook para eliminar una colección
  */
-export function useUpdateDeudores() {
+export function useDeleteCollection() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ deudores, fileName }: { deudores: Deudor[]; fileName?: string }) =>
-      updateDeudores(deudores, fileName),
-    onSuccess: (data: StoredDeudoresData) => {
-      // Invalidar queries relacionadas
+    mutationFn: (collectionId: string) => deleteCollection(collectionId),
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: deudoresQueryKeys.all,
       });
-
-      // Actualizar el cache
-      queryClient.setQueryData(deudoresQueryKeys.list(), data);
-
-      toast.success(`Datos actualizados: ${data.totalRecords} registros`);
+      toast.success('Tabla eliminada correctamente');
     },
     onError: (error: Error) => {
-      toast.error(`Error al actualizar deudores: ${error.message}`);
+      toast.error(`Error al eliminar tabla: ${error.message}`);
     },
   });
 }
 
 /**
- * Hook para eliminar todos los deudores
+ * Hook para actualizar el nombre de una colección
  */
-export function useClearDeudores() {
+export function useUpdateCollectionName() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: clearDeudores,
-    onSuccess: () => {
-      // Invalidar las queries
+    mutationFn: ({ collectionId, name }: { collectionId: string; name: string }) =>
+      updateCollectionName(collectionId, name),
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: deudoresQueryKeys.all,
+        queryKey: deudoresQueryKeys.collection(variables.collectionId),
       });
-
-      // Limpiar el cache
-      queryClient.setQueryData(deudoresQueryKeys.list(), null);
-
-      toast.success('Datos eliminados correctamente');
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collections(),
+      });
+      toast.success('Nombre actualizado');
     },
     onError: (error: Error) => {
-      toast.error(`Error al eliminar datos: ${error.message}`);
+      toast.error(`Error al actualizar nombre: ${error.message}`);
     },
   });
 }
@@ -126,24 +163,24 @@ export function useClearDeudores() {
 // ===== HELPERS =====
 
 /**
- * Hook para obtener información formateada de los deudores
+ * Hook para obtener información de una colección con sus deudores
  */
-export function useDeudoresInfo() {
-  const { data: deudoresData, isLoading } = useDeudores();
+export function useCollectionInfo(collectionId: string | null) {
+  const { data: collection, isLoading: isLoadingCollection } = useDeudorCollection(collectionId);
+  const { data: deudores = [], isLoading: isLoadingDeudores } =
+    useDeudoresByCollection(collectionId);
 
-  const hasData = !!deudoresData;
-  const deudores = deudoresData?.deudores || [];
-  const totalRecords = deudoresData?.totalRecords || 0;
-  const loadDate = deudoresData?.loadDate || null;
-  const fileName = deudoresData?.fileName || null;
+  const hasData = !!collection && deudores.length > 0;
+  const loadDate = collection?.loadDate ? new Date(collection.loadDate) : null;
 
   return {
+    collection,
     deudores,
     hasData,
-    totalRecords,
+    totalRecords: collection?.totalRecords || 0,
     loadDate,
-    fileName,
-    isLoading,
+    fileName: collection?.fileName || null,
+    isLoading: isLoadingCollection || isLoadingDeudores,
   };
 }
 
