@@ -1,15 +1,14 @@
+import { createFileRoute } from '@tanstack/react-router';
 import { TablaDeudores } from '@/features/deudores/components';
 import CsvLoader from '@/features/deudores/components/CSVLoader';
-import { Deudor } from '@/features/deudores/interfaces/deudor';
-import { createFileRoute } from '@tanstack/react-router';
 import { useState, useEffect } from 'react';
 import {
-  loadDeudoresFromStorage,
-  saveDeudoresToStorage,
-  clearStoredDeudores,
+  useDeudoresInfo,
+  useSaveDeudores,
+  useClearDeudores,
   formatLoadDate,
-} from '@/features/deudores/utils';
-import { toast } from '@/utils/toast';
+  Deudor,
+} from '@/features/deudores';
 import { usePlantillasForDeudores } from '@/common/hooks';
 
 export const Route = createFileRoute('/deudores/')({
@@ -17,83 +16,40 @@ export const Route = createFileRoute('/deudores/')({
 });
 
 function DeudoresPage() {
-  const [deudores, setDeudores] = useState<Deudor[]>([]);
-  const [hasStoredData, setHasStoredData] = useState(false);
-  const [lastLoadDate, setLastLoadDate] = useState<Date | null>(null);
-  const [fileName, setFileName] = useState<string | null>(null);
   const [showClearModal, setShowClearModal] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
 
-  // Cargar plantillas disponibles
+  const {
+    deudores,
+    hasData: hasStoredData,
+    loadDate: lastLoadDate,
+    fileName,
+    isLoading: isLoadingDeudores,
+  } = useDeudoresInfo();
+  const saveMutation = useSaveDeudores();
+  const clearMutation = useClearDeudores();
+
   const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
 
-  // Seleccionar automáticamente la primera plantilla cuando se cargan
   useEffect(() => {
     if (plantillas.length > 0 && !selectedPlantillaId) {
       setSelectedPlantillaId(plantillas[0].id);
     }
   }, [plantillas, selectedPlantillaId]);
 
-  // Cargar datos de IndexedDB al iniciar
-  useEffect(() => {
-    const loadStoredData = async () => {
-      try {
-        const storedData = await loadDeudoresFromStorage();
-        if (storedData) {
-          setDeudores(storedData.deudores);
-          setHasStoredData(true);
-          setLastLoadDate(new Date(storedData.loadDate));
-          setFileName(storedData.fileName);
-          toast.success(`Cargados ${storedData.deudores.length} registros desde IndexedDB`);
-        } else {
-          setHasStoredData(false);
-          setLastLoadDate(null);
-          setFileName(null);
-        }
-      } catch (error) {
-        console.error('Error al cargar datos:', error);
-        toast.error('Error al cargar datos guardados');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadStoredData();
-  }, []);
-
   const handleDataLoaded = async (data: Deudor[], uploadedFileName: string) => {
-    try {
-      // Guardar en IndexedDB automáticamente
-      await saveDeudoresToStorage(data, uploadedFileName);
-      setDeudores(data);
-      setHasStoredData(true);
-      setLastLoadDate(new Date());
-      setFileName(uploadedFileName);
-      toast.success(`Archivo cargado y guardado: ${data.length} registros`);
-    } catch (error) {
-      console.error('Error al guardar datos:', error);
-      toast.error('Archivo cargado pero no se pudo guardar localmente');
-      setDeudores(data);
-    }
+    saveMutation.mutate({ deudores: data, fileName: uploadedFileName });
   };
 
   const handleClearData = async () => {
-    try {
-      await clearStoredDeudores();
-      setDeudores([]);
-      setHasStoredData(false);
-      setLastLoadDate(null);
-      setFileName(null);
-      setShowClearModal(false);
-      toast.success('Datos eliminados correctamente');
-    } catch (error) {
-      console.error('Error al eliminar datos:', error);
-      toast.error('Error al eliminar los datos');
-    }
+    clearMutation.mutate(undefined, {
+      onSuccess: () => {
+        setShowClearModal(false);
+      },
+    });
   };
 
-  if (loading) {
+  if (isLoadingDeudores) {
     return (
       <div className="container mx-auto p-4">
         <div className="card bg-base-100 shadow-xl">
@@ -154,13 +110,16 @@ function DeudoresPage() {
         </div>
       </div>
 
-      <TablaDeudores
-        deudores={deudores}
-        plantillas={plantillas}
-        selectedPlantillaId={selectedPlantillaId}
-        onPlantillaChange={setSelectedPlantillaId}
-        isLoadingPlantillas={isLoadingPlantillas}
-      />
+      {/* TODO: instertar las tabs aqui: */}
+      <div>
+        <TablaDeudores
+          deudores={deudores}
+          plantillas={plantillas}
+          selectedPlantillaId={selectedPlantillaId}
+          onPlantillaChange={setSelectedPlantillaId}
+          isLoadingPlantillas={isLoadingPlantillas}
+        />
+      </div>
 
       {/* Modal de confirmación para eliminar datos */}
       {showClearModal && (

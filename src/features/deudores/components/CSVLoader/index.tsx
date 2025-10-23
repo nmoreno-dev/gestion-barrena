@@ -15,22 +15,11 @@ const CsvLoader: React.FC<CsvLoaderProps> = ({ onDataLoaded, onStatsUpdate, onEr
   const { error, stats, isLoading, parseFile, resetState, cancelParsing } = useCsvParser();
   const { modalRef, showModal, closeModal } = useCsvLoadingModal();
 
-  // Mostrar modal cuando inicia el parsing
   useEffect(() => {
     if (isLoading && !stats.isComplete) {
       showModal();
     }
   }, [isLoading, stats, showModal]);
-
-  //   // Cerrar modal cuando se completa
-  //   useEffect(() => {
-  //     if (stats?.isComplete) {
-  //       const timer = setTimeout(() => {
-  //         closeModal();
-  //       }, 5000);
-  //       return () => clearTimeout(timer);
-  //     }
-  //   }, [stats?.isComplete, closeModal]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
