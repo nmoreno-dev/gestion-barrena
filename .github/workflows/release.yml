@@ -36,16 +36,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
-      # ───────────────────────────────────────────────────────────────────────
-      - name: Sync main → testing (reset hard)
-        run: |
-          git fetch origin main
-          git checkout testing
-          git reset --hard origin/main
-          git push --force-with-lease origin testing
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Sync main → develop (reset hard)
         run: |
           git fetch origin main
