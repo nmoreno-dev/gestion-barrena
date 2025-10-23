@@ -1,3 +1,11 @@
+# [1.2.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.1.0...v1.2.0) (2025-10-23)
+
+### Features
+
+- add background and text color classes to body for improved styling ([710e3a1](https://github.com/nmoreno-dev/gestion-barrena/commit/710e3a1779a7351d42a0852b14b7cf418ef456c4))
+- implement PlantillaForm and PlantillaPreview components ([c3f49ee](https://github.com/nmoreno-dev/gestion-barrena/commit/c3f49ee4420063f2250431066fe34ef4671c818f))
+- remove sync step for main to testing in release workflow ([6c627a5](https://github.com/nmoreno-dev/gestion-barrena/commit/6c627a555a806727c2481909477a31bc3556b5a8))
+
 # [1.1.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.0.0...v1.1.0) (2025-10-22)
 
 ### Bug Fixes
