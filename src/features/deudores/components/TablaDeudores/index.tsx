@@ -199,64 +199,60 @@ const TablaDeudores = ({
   ];
 
   return (
-    <div className="card bg-base-100 shadow-sm">
-      <div className="card-body">
-        <div className="flex justify-between items-center mb-4 flex-col md:flex-row gap-4">
-          <h3 className="text-3xl font-semibold">
-            Lista de Deudores ({deudores.length} registros)
-          </h3>
+    <>
+      <div className="flex justify-between items-center mb-4 flex-col md:flex-row gap-4">
+        <h3 className="text-3xl font-semibold">Lista de Deudores ({deudores.length} registros)</h3>
 
-          {/* Dropdown de selección de plantilla */}
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <label className="text-sm font-medium whitespace-nowrap">Plantilla:</label>
-            {isLoadingPlantillas ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : plantillas.length === 0 ? (
-              <div className="text-sm text-base-content/60 italic">
-                No hay plantillas configuradas
-              </div>
-            ) : (
-              <select
-                className="select select-bordered select-sm w-full md:w-64"
-                value={selectedPlantillaId || plantillas[0]?.id || ''}
-                onChange={e => onPlantillaChange?.(e.target.value)}
-              >
-                {plantillas.map(plantilla => (
-                  <option key={plantilla.id} value={plantilla.id}>
-                    {plantilla.name}
-                  </option>
-                ))}
-              </select>
-            )}
+        {/* Dropdown de selección de plantilla */}
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <label className="text-sm font-medium whitespace-nowrap">Plantilla:</label>
+          {isLoadingPlantillas ? (
+            <span className="loading loading-spinner loading-sm"></span>
+          ) : plantillas.length === 0 ? (
+            <div className="text-sm text-base-content/60 italic">
+              No hay plantillas configuradas
+            </div>
+          ) : (
+            <select
+              className="select select-bordered select-sm w-full md:w-64"
+              value={selectedPlantillaId || plantillas[0]?.id || ''}
+              onChange={e => onPlantillaChange?.(e.target.value)}
+            >
+              {plantillas.map(plantilla => (
+                <option key={plantilla.id} value={plantilla.id}>
+                  {plantilla.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      </div>
+
+      {/* Indicador de plantilla seleccionada */}
+      {selectedPlantilla && (
+        <div className="alert alert-info mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="stroke-current shrink-0 w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <div>
+            <div className="font-semibold">Usando plantilla: {selectedPlantilla.name}</div>
+            <div className="text-sm">Asunto: {selectedPlantilla.subject}</div>
           </div>
         </div>
+      )}
 
-        {/* Indicador de plantilla seleccionada */}
-        {selectedPlantilla && (
-          <div className="alert alert-info mb-4">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              className="stroke-current shrink-0 w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            <div>
-              <div className="font-semibold">Usando plantilla: {selectedPlantilla.name}</div>
-              <div className="text-sm">Asunto: {selectedPlantilla.subject}</div>
-            </div>
-          </div>
-        )}
-
-        <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
-      </div>
-    </div>
+      <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
+    </>
   );
 };
 export default TablaDeudores;

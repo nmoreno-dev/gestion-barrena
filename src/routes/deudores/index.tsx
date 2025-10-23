@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { TablaDeudores } from '@/features/deudores/components';
+import { DeudoresTabs, TablaDeudores } from '@/features/deudores/components';
 import CsvLoader from '@/features/deudores/components/CSVLoader';
 import { useState, useEffect } from 'react';
 import {
@@ -110,8 +110,7 @@ function DeudoresPage() {
         </div>
       </div>
 
-      {/* TODO: instertar las tabs aqui: */}
-      <div>
+      <DeudoresTabs>
         <TablaDeudores
           deudores={deudores}
           plantillas={plantillas}
@@ -119,7 +118,7 @@ function DeudoresPage() {
           onPlantillaChange={setSelectedPlantillaId}
           isLoadingPlantillas={isLoadingPlantillas}
         />
-      </div>
+      </DeudoresTabs>
 
       {/* Modal de confirmación para eliminar datos */}
       {showClearModal && (
