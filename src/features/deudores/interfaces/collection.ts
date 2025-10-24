@@ -7,6 +7,7 @@ import type { Deudor } from './deudor';
 export interface DeudorCollection {
   id: string;
   name: string;
+  color?: string; // Color de la colección (clase de Tailwind)
   fileName?: string;
   loadDate?: number; // timestamp
   totalRecords: number;

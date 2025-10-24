@@ -3,3 +3,4 @@ export { default as CsvLoadingModal, useCsvLoadingModal } from './CsvLoadingModa
 export { default as TablaDeudores } from './TablaDeudores';
 export { DeudoresTabs } from './DeudoresTabs';
 export { default as CollectionTable } from './CollectionTable';
+export { ColorPickerModal } from './ColorPickerModal';

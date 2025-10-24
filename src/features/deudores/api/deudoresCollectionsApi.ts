@@ -5,13 +5,14 @@ import type { DeudorCollection, DeudorData } from '../interfaces/collection';
 /**
  * Crea una nueva colección de deudores
  */
-export async function createCollection(name: string): Promise<string> {
+export async function createCollection(name: string, color: string = 'blue-500'): Promise<string> {
   const id = crypto.randomUUID();
   const order = await getNextOrder();
 
   const collection: DeudorCollection = {
     id,
     name,
+    color,
     createdAt: Date.now(),
     totalRecords: 0,
     order,
@@ -186,6 +187,25 @@ export async function updateCollectionName(collectionId: string, name: string): 
   }
 
   collection.name = name;
+
+  await executeStoreOperation(STORES.DEUDORES_COLLECTIONS, 'readwrite', store =>
+    store.put(collection),
+  );
+}
+
+/**
+ * Actualiza el color de una colección
+ */
+export async function updateCollectionColor(collectionId: string, color: string): Promise<void> {
+  const collection = await executeStoreOperation(STORES.DEUDORES_COLLECTIONS, 'readonly', store =>
+    store.get(collectionId),
+  );
+
+  if (!collection) {
+    throw new Error(`Colección ${collectionId} no encontrada`);
+  }
+
+  collection.color = color;
 
   await executeStoreOperation(STORES.DEUDORES_COLLECTIONS, 'readwrite', store =>
     store.put(collection),

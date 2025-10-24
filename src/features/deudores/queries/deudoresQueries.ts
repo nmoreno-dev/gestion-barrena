@@ -8,6 +8,7 @@ import {
   saveDeudoresToCollection,
   deleteCollection,
   updateCollectionName,
+  updateCollectionColor,
 } from '../api/deudoresCollectionsApi';
 import { Deudor } from '../interfaces/deudor';
 
@@ -152,10 +153,32 @@ export function useUpdateCollectionName() {
       queryClient.invalidateQueries({
         queryKey: deudoresQueryKeys.collections(),
       });
-      toast.success('Nombre actualizado');
     },
     onError: (error: Error) => {
       toast.error(`Error al actualizar nombre: ${error.message}`);
+    },
+  });
+}
+
+/**
+ * Hook para actualizar el color de una colección
+ */
+export function useUpdateCollectionColor() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ collectionId, color }: { collectionId: string; color: string }) =>
+      updateCollectionColor(collectionId, color),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collection(variables.collectionId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collections(),
+      });
+    },
+    onError: (error: Error) => {
+      toast.error(`Error al actualizar color: ${error.message}`);
     },
   });
 }

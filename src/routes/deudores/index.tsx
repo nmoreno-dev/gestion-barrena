@@ -9,6 +9,7 @@ import {
   useDeleteCollection,
   useCreateCollection,
   useUpdateCollectionName,
+  useUpdateCollectionColor,
   formatLoadDate,
   Deudor,
 } from '@/features/deudores';
@@ -43,6 +44,7 @@ function DeudoresPage() {
   const clearMutation = useDeleteCollection();
   const createMutation = useCreateCollection();
   const updateNameMutation = useUpdateCollectionName();
+  const updateColorMutation = useUpdateCollectionColor();
 
   const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
 
@@ -132,6 +134,13 @@ function DeudoresPage() {
     });
   };
 
+  const handleChangeColor = (collectionId: string, color: string) => {
+    updateColorMutation.mutate({
+      collectionId,
+      color,
+    });
+  };
+
   if (isLoadingCollections && !currentCollectionId) {
     return (
       <div className="container mx-auto p-4">
@@ -193,6 +202,7 @@ function DeudoresPage() {
         onAddTab={handleAddTab}
         onDeleteTab={handleDeleteCollection}
         onRenameTab={handleRenameTab}
+        onChangeColor={handleChangeColor}
       >
         {collections.map(col => (
           <CollectionTable
