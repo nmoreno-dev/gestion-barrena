@@ -24,7 +24,9 @@ const DEFAULT_COLLECTION_NAME = 'Principal';
 function DeudoresPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
-  const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
+  const [selectedPlantillaByCollection, setSelectedPlantillaByCollection] = useState<
+    Record<string, string | null>
+  >({});
   const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
   const hasInitialized = useRef(false);
 
@@ -67,11 +69,24 @@ function DeudoresPage() {
     }
   }, [collections, isLoadingCollections, currentCollectionId, createMutation]);
 
+  // Inicializar plantilla por defecto para cada colección
   useEffect(() => {
-    if (plantillas.length > 0 && !selectedPlantillaId) {
-      setSelectedPlantillaId(plantillas[0].id);
+    if (plantillas.length > 0 && collections.length > 0) {
+      setSelectedPlantillaByCollection(prev => {
+        const updated = { ...prev };
+        let hasChanges = false;
+
+        collections.forEach(collection => {
+          if (!(collection.id in updated)) {
+            updated[collection.id] = plantillas[0].id;
+            hasChanges = true;
+          }
+        });
+
+        return hasChanges ? updated : prev;
+      });
     }
-  }, [plantillas, selectedPlantillaId]);
+  }, [plantillas, collections]);
 
   const handleDataLoaded = async (data: Deudor[], uploadedFileName: string) => {
     if (!currentCollectionId) return;
@@ -139,6 +154,13 @@ function DeudoresPage() {
       collectionId,
       color,
     });
+  };
+
+  const handlePlantillaChange = (collectionId: string, plantillaId: string | null) => {
+    setSelectedPlantillaByCollection(prev => ({
+      ...prev,
+      [collectionId]: plantillaId,
+    }));
   };
 
   if (isLoadingCollections && !currentCollectionId) {
@@ -210,8 +232,8 @@ function DeudoresPage() {
             collectionId={col.id}
             isActive={col.id === currentCollectionId}
             plantillas={plantillas}
-            selectedPlantillaId={selectedPlantillaId}
-            onPlantillaChange={setSelectedPlantillaId}
+            selectedPlantillaId={selectedPlantillaByCollection[col.id] || null}
+            onPlantillaChange={plantillaId => handlePlantillaChange(col.id, plantillaId)}
             isLoadingPlantillas={isLoadingPlantillas}
           />
         ))}
