@@ -84,7 +84,24 @@ export function DeudoresTabs({
   };
 
   const activeCollection = collections.find(c => c.id === activeCollectionId);
-  const activeBorderClass = `border-${activeCollection?.color || 'blue-500'}`;
+
+  // Mapeo de colores Tailwind a valores RGB reales
+  const colorMap: Record<string, string> = {
+    'pink-500': '236, 72, 153',
+    'purple-500': '168, 85, 247',
+    'blue-500': '59, 130, 246',
+    'cyan-500': '6, 182, 212',
+    'teal-500': '20, 184, 166',
+    'emerald-500': '16, 185, 129',
+    'lime-500': '132, 204, 22',
+    'amber-500': '245, 158, 11',
+    'orange-500': '249, 115, 22',
+    'red-500': '239, 68, 68',
+  };
+
+  // Color de la colección activa que se aplicará a todos los bordes
+  const activeColor = activeCollection?.color || 'blue-500';
+  const activeRgbColor = colorMap[activeColor] || colorMap['blue-500'];
 
   return (
     <div className="w-full">
@@ -94,21 +111,23 @@ export function DeudoresTabs({
           const isActive = collection.id === activeCollectionId;
           const isEditing = editingTabId === collection.id;
           const collectionColor = collection.color || 'blue-500';
-          const borderColorClass = `border-${collectionColor}`;
-          const textColorClass = `text-${collectionColor}`;
+          const rgbColor = colorMap[collectionColor] || colorMap['blue-500'];
 
           return (
             <div
               key={collection.id}
               role="tab"
               className={cn(
-                `tab h-12 font-semibold ${textColorClass} transition-all duration-150 border-b-3 bg-base-100 rounded-t-xl relative group px-3`,
+                'tab h-12 font-semibold transition-all duration-150 bg-base-100 rounded-t-xl relative group px-3',
                 {
-                  [`tab-active ${borderColorClass} shadow-lg border-b-6`]: isActive,
-                  [`hover:scale-102 hover:shadow-md`]: !isActive,
-                  [activeBorderClass]: !isActive,
+                  'tab-active shadow-lg border-b-4': isActive,
+                  'hover:shadow-md border-b-2': !isActive,
                 },
               )}
+              style={{
+                color: `rgb(${rgbColor})`,
+                borderBottomColor: `rgb(${activeRgbColor})`,
+              }}
             >
               {isEditing ? (
                 <div className="flex items-center gap-2" ref={editingRef}>
@@ -189,9 +208,10 @@ export function DeudoresTabs({
 
       {/* Tab Content */}
       <div
-        className={`card bg-base-100 shadow-xl rounded-tl-none border-l-4 border-l-${
-          collections.find(c => c.id === activeCollectionId)?.color || 'blue-500'
-        }`}
+        className="card bg-base-100 shadow-xl rounded-tl-none border-l-4"
+        style={{
+          borderLeftColor: `rgb(${activeRgbColor})`,
+        }}
       >
         <div className="card-body animate-in fade-in duration-300">{children}</div>
       </div>
