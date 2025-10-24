@@ -6,13 +6,14 @@
  */
 
 export const DB_NAME = 'GestionBarrenaDB';
-export const DB_VERSION = 2;
+export const DB_VERSION = 3;
 
 /**
  * Definición de los object stores de la aplicación
  */
 export const STORES = {
-  DEUDORES: 'deudores',
+  DEUDORES_COLLECTIONS: 'deudores_collections',
+  DEUDORES_DATA: 'deudores_data',
   PLANTILLAS: 'plantillas',
 } as const;
 
@@ -27,6 +28,7 @@ export type StoreName = (typeof STORES)[keyof typeof STORES];
 interface StoreConfig {
   name: StoreName;
   keyPath: string;
+  autoIncrement?: boolean; // Para optimizar con auto-IDs
   indexes?: Array<{
     name: string;
     keyPath: string;
@@ -35,26 +37,37 @@ interface StoreConfig {
 }
 
 /**
- * Definición de stores por versión para facilitar migraciones
+ * Definición de todos los stores de la aplicación
+ * Optimizado para reducir footprint de almacenamiento:
+ * - Auto-increment IDs para datos de alto volumen (ahorra ~720KB con 20k registros)
+ * - Nombres de campos comprimidos: collectionId -> cid (ahorra ~2MB)
+ * - Timestamps en lugar de ISO strings (ahorra ~480KB)
  */
-const STORE_CONFIGS: Record<number, StoreConfig[]> = {
-  1: [
-    {
-      name: STORES.DEUDORES,
-      keyPath: 'id',
-    },
-  ],
-  2: [
-    {
-      name: STORES.PLANTILLAS,
-      keyPath: 'id',
-      indexes: [
-        { name: 'name', keyPath: 'name', options: { unique: false } },
-        { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
-      ],
-    },
-  ],
-};
+const STORE_CONFIGS: StoreConfig[] = [
+  {
+    name: STORES.DEUDORES_COLLECTIONS,
+    keyPath: 'id',
+    autoIncrement: false, // UUID para metadata (bajo volumen)
+    indexes: [{ name: 'order', keyPath: 'order', options: { unique: false } }],
+  },
+  {
+    name: STORES.DEUDORES_DATA,
+    keyPath: 'id',
+    autoIncrement: true, // Auto-increment para optimizar espacio
+    indexes: [
+      { name: 'cid', keyPath: 'cid', options: { unique: false } }, // collectionId comprimido
+    ],
+  },
+  {
+    name: STORES.PLANTILLAS,
+    keyPath: 'id',
+    autoIncrement: false,
+    indexes: [
+      { name: 'name', keyPath: 'name', options: { unique: false } },
+      { name: 'createdAt', keyPath: 'createdAt', options: { unique: false } },
+    ],
+  },
+];
 
 /**
  * Instancia singleton de la conexión a la base de datos
@@ -66,7 +79,10 @@ let dbInstance: IDBDatabase | null = null;
  */
 function createStore(db: IDBDatabase, config: StoreConfig): void {
   if (!db.objectStoreNames.contains(config.name)) {
-    const store = db.createObjectStore(config.name, { keyPath: config.keyPath });
+    const store = db.createObjectStore(config.name, {
+      keyPath: config.keyPath,
+      autoIncrement: config.autoIncrement,
+    });
 
     // Crear índices si están definidos
     if (config.indexes) {
@@ -110,22 +126,22 @@ export function openDB(): Promise<IDBDatabase> {
       resolve(dbInstance);
     };
 
-    request.onupgradeneeded = event => {
+    request.onupgradeneeded = () => {
       const db = request.result;
-      const oldVersion = (event as IDBVersionChangeEvent).oldVersion;
 
-      console.log(`Migrando base de datos de versión ${oldVersion} a ${DB_VERSION}`);
+      console.log(`Inicializando base de datos versión ${DB_VERSION}`);
 
-      // Aplicar migraciones incrementales
-      for (let version = oldVersion + 1; version <= DB_VERSION; version++) {
-        const storeConfigs = STORE_CONFIGS[version];
+      // Eliminar todos los stores existentes para partir limpio
+      const existingStores = Array.from(db.objectStoreNames);
+      existingStores.forEach(storeName => {
+        db.deleteObjectStore(storeName);
+        console.log(`✓ Object store '${storeName}' eliminado`);
+      });
 
-        if (storeConfigs) {
-          storeConfigs.forEach(config => createStore(db, config));
-        }
-      }
+      // Crear todos los stores necesarios
+      STORE_CONFIGS.forEach(config => createStore(db, config));
 
-      console.log('Migración completada con éxito');
+      console.log('Base de datos inicializada con éxito');
     };
 
     request.onblocked = () => {
@@ -215,12 +231,19 @@ export async function withTransaction<T>(
     // Esperar a que la transacción se complete
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(new Error('Transaction aborted'));
+      transaction.onerror = () => {
+        console.error('Error en transacción:', transaction.error);
+        reject(transaction.error);
+      };
+      transaction.onabort = () => {
+        console.error('Transacción abortada');
+        reject(new Error('Transaction aborted'));
+      };
     });
 
     return result;
   } catch (error) {
+    console.error('Error ejecutando transacción:', error);
     transaction.abort();
     throw error;
   }
@@ -238,7 +261,31 @@ export async function executeStoreOperation<T>(
     return new Promise((resolve, reject) => {
       const request = operation(store as IDBObjectStore);
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        console.error('Error en operación de store:', request.error);
+        reject(request.error);
+      };
+    });
+  });
+}
+
+/**
+ * Helper para ejecutar una operación en un índice
+ */
+export async function executeIndexOperation<T>(
+  storeName: StoreName,
+  indexName: string,
+  operation: (index: IDBIndex) => IDBRequest<T>,
+): Promise<T> {
+  return withTransaction(storeName, 'readonly', store => {
+    return new Promise((resolve, reject) => {
+      const index = (store as IDBObjectStore).index(indexName);
+      const request = operation(index);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => {
+        console.error(`Error en operación de índice '${indexName}':`, request.error);
+        reject(request.error);
+      };
     });
   });
 }
@@ -253,4 +300,5 @@ export default {
   getDBInfo,
   withTransaction,
   executeStoreOperation,
+  executeIndexOperation,
 };

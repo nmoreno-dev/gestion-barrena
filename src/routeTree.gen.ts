@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PlantillasIndexRouteImport } from './routes/plantillas/index'
+import { Route as DeudoresIndexRouteImport } from './routes/deudores/index'
 import { Route as PlantillasCrearRouteImport } from './routes/plantillas/crear'
 import { Route as PlantillasEditarSlugRouteImport } from './routes/plantillas/editar.$slug'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const PlantillasIndexRoute = PlantillasIndexRouteImport.update({
   id: '/plantillas/',
   path: '/plantillas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeudoresIndexRoute = DeudoresIndexRouteImport.update({
+  id: '/deudores/',
+  path: '/deudores/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlantillasCrearRoute = PlantillasCrearRouteImport.update({
@@ -38,12 +44,14 @@ const PlantillasEditarSlugRoute = PlantillasEditarSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
+  '/deudores': typeof DeudoresIndexRoute
   '/plantillas': typeof PlantillasIndexRoute
   '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
+  '/deudores': typeof DeudoresIndexRoute
   '/plantillas': typeof PlantillasIndexRoute
   '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
@@ -51,6 +59,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
+  '/deudores/': typeof DeudoresIndexRoute
   '/plantillas/': typeof PlantillasIndexRoute
   '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
@@ -59,14 +68,21 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/plantillas/crear'
+    | '/deudores'
     | '/plantillas'
     | '/plantillas/editar/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/plantillas/crear' | '/plantillas' | '/plantillas/editar/$slug'
+  to:
+    | '/'
+    | '/plantillas/crear'
+    | '/deudores'
+    | '/plantillas'
+    | '/plantillas/editar/$slug'
   id:
     | '__root__'
     | '/'
     | '/plantillas/crear'
+    | '/deudores/'
     | '/plantillas/'
     | '/plantillas/editar/$slug'
   fileRoutesById: FileRoutesById
@@ -74,6 +90,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   PlantillasCrearRoute: typeof PlantillasCrearRoute
+  DeudoresIndexRoute: typeof DeudoresIndexRoute
   PlantillasIndexRoute: typeof PlantillasIndexRoute
   PlantillasEditarSlugRoute: typeof PlantillasEditarSlugRoute
 }
@@ -92,6 +109,13 @@ declare module '@tanstack/react-router' {
       path: '/plantillas'
       fullPath: '/plantillas'
       preLoaderRoute: typeof PlantillasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/deudores/': {
+      id: '/deudores/'
+      path: '/deudores'
+      fullPath: '/deudores'
+      preLoaderRoute: typeof DeudoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/plantillas/crear': {
@@ -114,6 +138,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   PlantillasCrearRoute: PlantillasCrearRoute,
+  DeudoresIndexRoute: DeudoresIndexRoute,
   PlantillasIndexRoute: PlantillasIndexRoute,
   PlantillasEditarSlugRoute: PlantillasEditarSlugRoute,
 }
