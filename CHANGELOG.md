@@ -1,3 +1,27 @@
+# [1.3.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.2.0...v1.3.0) (2025-10-24)
+
+### Bug Fixes
+
+- enhance DeudoresTabs with RGB color mapping for improved styling ([16fb1a6](https://github.com/nmoreno-dev/gestion-barrena/commit/16fb1a67850af1a0eeff31b1d563930c7a364798))
+- improve DeudoresTabs styling and button interactions ([3b123e0](https://github.com/nmoreno-dev/gestion-barrena/commit/3b123e0712e7bf61339a5419c2371644136e77ad))
+- update footer to include a link for the author ([85d659e](https://github.com/nmoreno-dev/gestion-barrena/commit/85d659e3b50ddf812ace9295e36279fc76d58c23))
+- update storage references to use STORES.DEUDORES_DATA in deudoresApi ([680bad6](https://github.com/nmoreno-dev/gestion-barrena/commit/680bad62bac995125420d4d97a7c61c25e70c16b))
+
+### Features
+
+- add color management to collections with ColorPickerModal and update functionality ([0f57648](https://github.com/nmoreno-dev/gestion-barrena/commit/0f576484640a1ced0d287d285143fc85c048d3d4))
+- add Deudores route and page for managing debtor information ([4daf5ee](https://github.com/nmoreno-dev/gestion-barrena/commit/4daf5ee85859726483036355ee8544d2ce5984d6))
+- add DeudoresTabs component and integrate it into DeudoresPage ([3714153](https://github.com/nmoreno-dev/gestion-barrena/commit/3714153dc8aacbc3f82aca3bfde00652188a3411))
+- add error logging and new index operation helper for Deudores collections ([e51283b](https://github.com/nmoreno-dev/gestion-barrena/commit/e51283b880f8505aa8971fdd4de030cca423d622))
+- enhance DeudoresTabs and DeudoresPage with improved tab editing and deletion handling ([816813d](https://github.com/nmoreno-dev/gestion-barrena/commit/816813d4f29eb850ba920d440f429448f0c3a2b5))
+- enhance DeudoresTabs with editing and deletion functionality ([5e005b5](https://github.com/nmoreno-dev/gestion-barrena/commit/5e005b546ff6c8bb27bd0ac93bba9e0c037eddf4))
+- implement CollectionTable component and integrate it into DeudoresPage ([10e92b8](https://github.com/nmoreno-dev/gestion-barrena/commit/10e92b8cd278330229fee3e50a41bf86fcfe99d5))
+- implement CRUD operations for Deudores with IndexedDB integration ([cf91007](https://github.com/nmoreno-dev/gestion-barrena/commit/cf91007c417025db9b93a5c3f115946a175a64b4))
+- optimize IndexedDB schema with auto increment IDs and compressed fields for Deudores ([5cbfad2](https://github.com/nmoreno-dev/gestion-barrena/commit/5cbfad28f853bfd11da01a8fe9c4a16ed0f320ed))
+- refactor plantilla selection to support multiple collections in DeudoresPage ([d7a34b2](https://github.com/nmoreno-dev/gestion-barrena/commit/d7a34b29c1b7e78dec8ccba510a92e5c3848d9fb))
+- update DeudoresTabs to include Sheet icon and adjust button padding ([62982e1](https://github.com/nmoreno-dev/gestion-barrena/commit/62982e1106e5c708adf95ade1f505d30b5ff0ac1))
+- update IndexedDB schema and implement collections management for Deudores ([b50013a](https://github.com/nmoreno-dev/gestion-barrena/commit/b50013ae572439fab50a7748f145bb4071058257))
+
 # [1.2.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.1.0...v1.2.0) (2025-10-23)
 
 ### Features
