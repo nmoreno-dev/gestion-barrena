@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect, useRef } from 'react';
 import cn from 'classnames';
-import { Plus, X, Check, Palette } from 'lucide-react';
+import { Plus, X, Check, Palette, Sheet } from 'lucide-react';
 import type { DeudorCollection } from '../../interfaces/collection';
 import { ColorPickerModal } from '../ColorPickerModal';
 
@@ -112,7 +112,6 @@ export function DeudoresTabs({
             >
               {isEditing ? (
                 <div className="flex items-center gap-2" ref={editingRef}>
-                  📊
                   <input
                     type="text"
                     value={editingName}
@@ -153,11 +152,12 @@ export function DeudoresTabs({
                     onDoubleClick={() => handleStartEdit(collection)}
                     title="Doble click para editar"
                   >
-                    📊 {collection.name}
+                    <Sheet size={20} />
+                    {collection.name}
                   </span>
 
                   <button
-                    className="btn btn-ghost btn-xs text-error opacity-60 hover:opacity-100 p-0"
+                    className="btn btn-ghost btn-xs text-error opacity-60 hover:opacity-100 p-0.5"
                     onClick={e => {
                       e.stopPropagation();
                       onDeleteTab(collection.id);
