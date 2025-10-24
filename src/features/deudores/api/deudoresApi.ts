@@ -15,7 +15,7 @@ const STORAGE_KEY = 'current-deudores';
  * Obtiene todos los deudores almacenados
  */
 export async function getDeudores(): Promise<StoredDeudoresData | null> {
-  const result = await executeStoreOperation(STORES.DEUDORES, 'readonly', store =>
+  const result = await executeStoreOperation(STORES.DEUDORES_DATA, 'readonly', store =>
     store.get(STORAGE_KEY),
   );
 
@@ -45,7 +45,7 @@ export async function saveDeudores(
     fileName,
   };
 
-  await executeStoreOperation(STORES.DEUDORES, 'readwrite', store => store.put(dataToStore));
+  await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store => store.put(dataToStore));
 
   console.log(`Guardados ${deudores.length} deudores en IndexedDB`);
 
@@ -68,7 +68,9 @@ export async function updateDeudores(
  * Elimina todos los datos de deudores
  */
 export async function clearDeudores(): Promise<void> {
-  await executeStoreOperation(STORES.DEUDORES, 'readwrite', store => store.delete(STORAGE_KEY));
+  await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store =>
+    store.delete(STORAGE_KEY),
+  );
   console.log('Datos de deudores eliminados de IndexedDB');
 }
 

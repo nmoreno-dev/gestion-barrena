@@ -27,7 +27,7 @@ export const saveDeudoresToStorage = async (
       fileName,
     };
 
-    await executeStoreOperation(STORES.DEUDORES, 'readwrite', store => store.put(dataToStore));
+    await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store => store.put(dataToStore));
 
     console.log(`Guardados ${deudores.length} deudores en IndexedDB`);
   } catch (error) {
@@ -41,7 +41,7 @@ export const saveDeudoresToStorage = async (
  */
 export const loadDeudoresFromStorage = async (): Promise<StoredDeudoresData | null> => {
   try {
-    const result = await executeStoreOperation(STORES.DEUDORES, 'readonly', store =>
+    const result = await executeStoreOperation(STORES.DEUDORES_DATA, 'readonly', store =>
       store.get(STORAGE_KEY),
     );
 
@@ -87,7 +87,9 @@ export const getLastLoadDate = async (): Promise<Date | null> => {
  */
 export const clearStoredDeudores = async (): Promise<void> => {
   try {
-    await executeStoreOperation(STORES.DEUDORES, 'readwrite', store => store.delete(STORAGE_KEY));
+    await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store =>
+      store.delete(STORAGE_KEY),
+    );
 
     console.log('Datos eliminados de IndexedDB');
   } catch (error) {
