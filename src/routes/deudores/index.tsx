@@ -8,6 +8,7 @@ import {
   useSaveDeudoresToCollection,
   useDeleteCollection,
   useCreateCollection,
+  useUpdateCollectionName,
   formatLoadDate,
   Deudor,
 } from '@/features/deudores';
@@ -20,7 +21,8 @@ export const Route = createFileRoute('/deudores/')({
 const DEFAULT_COLLECTION_NAME = 'Principal';
 
 function DeudoresPage() {
-  const [showClearModal, setShowClearModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [collectionToDelete, setCollectionToDelete] = useState<string | null>(null);
   const [selectedPlantillaId, setSelectedPlantillaId] = useState<string | null>(null);
   const [currentCollectionId, setCurrentCollectionId] = useState<string | null>(null);
   const hasInitialized = useRef(false);
@@ -41,6 +43,7 @@ function DeudoresPage() {
   const saveMutation = useSaveDeudoresToCollection();
   const clearMutation = useDeleteCollection();
   const createMutation = useCreateCollection();
+  const updateNameMutation = useUpdateCollectionName();
 
   const { data: plantillas = [], isLoading: isLoadingPlantillas } = usePlantillasForDeudores();
 
@@ -79,27 +82,52 @@ function DeudoresPage() {
     });
   };
 
-  const handleClearData = async () => {
-    if (!currentCollectionId) return;
+  const handleAddTab = () => {
+    const newTabNumber = collections.length + 1;
+    const newName = `Tabla ${newTabNumber}`;
 
-    clearMutation.mutate(currentCollectionId, {
+    createMutation.mutate(newName, {
+      onSuccess: collectionId => {
+        setCurrentCollectionId(collectionId);
+      },
+    });
+  };
+
+  const handleDeleteCollection = (collectionId: string) => {
+    setCollectionToDelete(collectionId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteCollection = () => {
+    if (!collectionToDelete) return;
+
+    clearMutation.mutate(collectionToDelete, {
       onSuccess: () => {
-        setShowClearModal(false);
-        // Si era la única colección, crear una nueva
-        if (collections.length === 1) {
-          createMutation.mutate(DEFAULT_COLLECTION_NAME, {
-            onSuccess: collectionId => {
-              setCurrentCollectionId(collectionId);
-            },
-          });
-        } else {
-          // Seleccionar otra colección
-          const otherCollection = collections.find(c => c.id !== currentCollectionId);
+        setShowDeleteModal(false);
+        setCollectionToDelete(null);
+
+        // Si eliminamos la colección activa, seleccionar otra
+        if (collectionToDelete === currentCollectionId) {
+          const otherCollection = collections.find(c => c.id !== collectionToDelete);
           if (otherCollection) {
             setCurrentCollectionId(otherCollection.id);
+          } else if (collections.length === 1) {
+            // Era la última, crear una nueva
+            createMutation.mutate(DEFAULT_COLLECTION_NAME, {
+              onSuccess: collectionId => {
+                setCurrentCollectionId(collectionId);
+              },
+            });
           }
         }
       },
+    });
+  };
+
+  const handleRenameTab = (collectionId: string, newName: string) => {
+    updateNameMutation.mutate({
+      collectionId,
+      name: newName,
     });
   };
 
@@ -126,23 +154,14 @@ function DeudoresPage() {
             <h2 className="card-title mb-4 md:mb-0 text-2xl">
               Gestión de Deudores {collection && `- ${collection.name}`}
             </h2>
-            {hasData && (
-              <div className="flex flex-col items-end gap-2">
-                <div className="flex items-center gap-2 flex-col sm:flex-row">
-                  {lastLoadDate && (
-                    <div className="text-gray-500 wrap-anywhere">
-                      <div>
-                        <strong>Archivo:</strong> {fileName || 'Sin nombre'}
-                      </div>
-                      <div>
-                        <strong>Cargado:</strong>{' '}
-                        <span className="font-medium">{formatLoadDate(lastLoadDate)}</span>
-                      </div>
-                    </div>
-                  )}
-                  <button className="btn btn-warning" onClick={() => setShowClearModal(true)}>
-                    🗑️ Eliminar Datos
-                  </button>
+            {hasData && lastLoadDate && (
+              <div className="text-gray-500 wrap-anywhere text-right">
+                <div>
+                  <strong>Archivo:</strong> {fileName || 'Sin nombre'}
+                </div>
+                <div>
+                  <strong>Cargado:</strong>{' '}
+                  <span className="font-medium">{formatLoadDate(lastLoadDate)}</span>
                 </div>
               </div>
             )}
@@ -166,7 +185,14 @@ function DeudoresPage() {
         </div>
       </div>
 
-      <DeudoresTabs>
+      <DeudoresTabs
+        collections={collections}
+        activeCollectionId={currentCollectionId}
+        onTabChange={setCurrentCollectionId}
+        onAddTab={handleAddTab}
+        onDeleteTab={handleDeleteCollection}
+        onRenameTab={handleRenameTab}
+      >
         <TablaDeudores
           deudores={deudores}
           plantillas={plantillas}
@@ -176,29 +202,44 @@ function DeudoresPage() {
         />
       </DeudoresTabs>
 
-      {/* Modal de confirmación para eliminar datos */}
-      {showClearModal && (
-        <div className="modal modal-open">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg">⚠️ Confirmar eliminación</h3>
-            <p className="py-4">
-              ¿Estás seguro de que quieres eliminar todos los datos cargados?
-              <br />
-              <span className="text-warning font-medium">
-                Esta acción no se puede deshacer y perderás {deudores.length} registros.
-              </span>
-            </p>
-            <div className="modal-action">
-              <button className="btn btn-ghost" onClick={() => setShowClearModal(false)}>
-                Cancelar
-              </button>
-              <button className="btn btn-error" onClick={handleClearData}>
-                Eliminar Datos
-              </button>
+      {/* Modal de confirmación para eliminar colección */}
+      {showDeleteModal &&
+        collectionToDelete &&
+        (() => {
+          const collectionData = collections.find(c => c.id === collectionToDelete);
+          const recordCount = collectionData?.totalRecords || 0;
+
+          return (
+            <div className="modal modal-open">
+              <div className="modal-box">
+                <h3 className="font-bold text-lg">⚠️ Confirmar eliminación de tabla</h3>
+                <p className="py-4">
+                  ¿Estás seguro de que quieres eliminar la tabla{' '}
+                  <strong>{collectionData?.name}</strong> y todos sus datos?
+                  <br />
+                  <span className="text-warning font-medium">
+                    Esta acción no se puede deshacer
+                    {recordCount > 0 && ` y perderás ${recordCount} registros`}.
+                  </span>
+                </p>
+                <div className="modal-action">
+                  <button
+                    className="btn btn-ghost"
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setCollectionToDelete(null);
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                  <button className="btn btn-error" onClick={confirmDeleteCollection}>
+                    Eliminar Tabla
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
     </div>
   );
 }
