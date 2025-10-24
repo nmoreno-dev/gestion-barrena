@@ -12,7 +12,7 @@ export async function createCollection(name: string): Promise<string> {
   const collection: DeudorCollection = {
     id,
     name,
-    createdAt: new Date().toISOString(),
+    createdAt: Date.now(),
     totalRecords: 0,
     order,
   };
@@ -91,23 +91,24 @@ export async function saveDeudoresToCollection(
 
       // Eliminar deudores existentes de esta colección
       for (const deudor of existingDeudores) {
-        dataStore.delete(deudor.id);
+        if (deudor.id !== undefined) {
+          dataStore.delete(deudor.id);
+        }
       }
 
       // Actualizar metadata
       collection.fileName = fileName;
-      collection.loadDate = new Date().toISOString();
+      collection.loadDate = Date.now();
       collection.totalRecords = deudores.length;
       collectionsStore.put(collection);
 
-      // Guardar nuevos deudores
+      // Guardar nuevos deudores con campos comprimidos
       for (const deudor of deudores) {
         const deudorData: DeudorData = {
-          id: crypto.randomUUID(),
-          collectionId,
+          cid: collectionId, // campo comprimido
           ...deudor,
         };
-        dataStore.add(deudorData);
+        dataStore.add(deudorData); // id auto-generado
       }
 
       console.log(`✓ Guardados ${deudores.length} deudores en colección "${collection.name}"`);
@@ -122,7 +123,7 @@ async function getDeudoresByCollectionIds(collectionId: string): Promise<DeudorD
   const db = await openDB();
   const transaction = db.transaction(STORES.DEUDORES_DATA, 'readonly');
   const store = transaction.objectStore(STORES.DEUDORES_DATA);
-  const index = store.index('collectionId');
+  const index = store.index('cid'); // campo comprimido
 
   return new Promise((resolve, reject) => {
     const request = index.getAll(collectionId);
@@ -138,15 +139,15 @@ export async function getDeudoresByCollection(collectionId: string): Promise<Deu
   const db = await openDB();
   const transaction = db.transaction(STORES.DEUDORES_DATA, 'readonly');
   const store = transaction.objectStore(STORES.DEUDORES_DATA);
-  const index = store.index('collectionId');
+  const index = store.index('cid'); // campo comprimido
 
   return new Promise((resolve, reject) => {
     const request = index.getAll(collectionId);
     request.onsuccess = () => {
-      // Remover el id y collectionId para devolver solo los datos del Deudor
+      // Remover el id y cid para devolver solo los datos del Deudor
       const deudores = request.result.map((data: DeudorData) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, collectionId: _collectionId, ...deudor } = data;
+        const { id, cid, ...deudor } = data;
         return deudor as Deudor;
       });
       resolve(deudores);
@@ -180,7 +181,7 @@ export async function deleteCollection(collectionId: string): Promise<void> {
       const index = db
         .transaction(STORES.DEUDORES_DATA, 'readonly')
         .objectStore(STORES.DEUDORES_DATA)
-        .index('collectionId');
+        .index('cid'); // campo comprimido
 
       const deudores = await new Promise<DeudorData[]>((resolve, reject) => {
         const req = index.getAll(collectionId);
@@ -189,7 +190,9 @@ export async function deleteCollection(collectionId: string): Promise<void> {
       });
 
       for (const deudor of deudores) {
-        dataStore.delete(deudor.id);
+        if (deudor.id !== undefined) {
+          dataStore.delete(deudor.id);
+        }
       }
 
       console.log(`✓ Colección "${collection?.name}" eliminada con ${deudores.length} deudores`);
