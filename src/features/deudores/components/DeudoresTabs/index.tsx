@@ -104,15 +104,14 @@ export function DeudoresTabs({
                     📊 {collection.name}
                   </span>
 
-                  {/* Botón de eliminación (visible solo en tab activa) */}
-                  {isActive && collections.length > 1 && (
+                  {isActive && collection.totalRecords > 0 && (
                     <button
                       className="btn btn-ghost btn-xs text-error opacity-60 hover:opacity-100 ml-2"
                       onClick={e => {
                         e.stopPropagation();
                         onDeleteTab(collection.id);
                       }}
-                      title="Eliminar tab"
+                      title="Eliminar tabla y sus datos"
                     >
                       <X size={14} />
                     </button>

@@ -231,12 +231,19 @@ export async function withTransaction<T>(
     // Esperar a que la transacción se complete
     await new Promise<void>((resolve, reject) => {
       transaction.oncomplete = () => resolve();
-      transaction.onerror = () => reject(transaction.error);
-      transaction.onabort = () => reject(new Error('Transaction aborted'));
+      transaction.onerror = () => {
+        console.error('Error en transacción:', transaction.error);
+        reject(transaction.error);
+      };
+      transaction.onabort = () => {
+        console.error('Transacción abortada');
+        reject(new Error('Transaction aborted'));
+      };
     });
 
     return result;
   } catch (error) {
+    console.error('Error ejecutando transacción:', error);
     transaction.abort();
     throw error;
   }
@@ -254,7 +261,31 @@ export async function executeStoreOperation<T>(
     return new Promise((resolve, reject) => {
       const request = operation(store as IDBObjectStore);
       request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        console.error('Error en operación de store:', request.error);
+        reject(request.error);
+      };
+    });
+  });
+}
+
+/**
+ * Helper para ejecutar una operación en un índice
+ */
+export async function executeIndexOperation<T>(
+  storeName: StoreName,
+  indexName: string,
+  operation: (index: IDBIndex) => IDBRequest<T>,
+): Promise<T> {
+  return withTransaction(storeName, 'readonly', store => {
+    return new Promise((resolve, reject) => {
+      const index = (store as IDBObjectStore).index(indexName);
+      const request = operation(index);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => {
+        console.error(`Error en operación de índice '${indexName}':`, request.error);
+        reject(request.error);
+      };
     });
   });
 }
@@ -269,4 +300,5 @@ export default {
   getDBInfo,
   withTransaction,
   executeStoreOperation,
+  executeIndexOperation,
 };

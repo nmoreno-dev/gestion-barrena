@@ -1,4 +1,4 @@
-import { executeStoreOperation, STORES, openDB, withTransaction } from '@/app/db';
+import { executeStoreOperation, executeIndexOperation, STORES, withTransaction } from '@/app/db';
 import type { Deudor } from '../interfaces/deudor';
 import type { DeudorCollection, DeudorData } from '../interfaces/collection';
 
@@ -78,11 +78,14 @@ export async function saveDeudoresToCollection(
     async stores => {
       const [collectionsStore, dataStore] = stores as IDBObjectStore[];
 
-      // Actualizar metadata de la colección
+      // Obtener metadata de la colección
       const collection = await new Promise<DeudorCollection>((resolve, reject) => {
         const req = collectionsStore.get(collectionId);
         req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+        req.onerror = () => {
+          console.error('Error obteniendo colección:', req.error);
+          reject(req.error);
+        };
       });
 
       if (!collection) {
@@ -120,39 +123,22 @@ export async function saveDeudoresToCollection(
  * Obtiene los DeudorData (con ids) de una colección - uso interno
  */
 async function getDeudoresByCollectionIds(collectionId: string): Promise<DeudorData[]> {
-  const db = await openDB();
-  const transaction = db.transaction(STORES.DEUDORES_DATA, 'readonly');
-  const store = transaction.objectStore(STORES.DEUDORES_DATA);
-  const index = store.index('cid'); // campo comprimido
-
-  return new Promise((resolve, reject) => {
-    const request = index.getAll(collectionId);
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
+  return executeIndexOperation(STORES.DEUDORES_DATA, 'cid', index => index.getAll(collectionId));
 }
 
 /**
  * Obtiene todos los deudores de una colección
  */
 export async function getDeudoresByCollection(collectionId: string): Promise<Deudor[]> {
-  const db = await openDB();
-  const transaction = db.transaction(STORES.DEUDORES_DATA, 'readonly');
-  const store = transaction.objectStore(STORES.DEUDORES_DATA);
-  const index = store.index('cid'); // campo comprimido
+  const result = await executeIndexOperation(STORES.DEUDORES_DATA, 'cid', index =>
+    index.getAll(collectionId),
+  );
 
-  return new Promise((resolve, reject) => {
-    const request = index.getAll(collectionId);
-    request.onsuccess = () => {
-      // Remover el id y cid para devolver solo los datos del Deudor
-      const deudores = request.result.map((data: DeudorData) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { id, cid, ...deudor } = data;
-        return deudor as Deudor;
-      });
-      resolve(deudores);
-    };
-    request.onerror = () => reject(request.error);
+  // Remover el id y cid para devolver solo los datos del Deudor
+  return result.map((data: DeudorData) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, cid, ...deudor } = data;
+    return deudor as Deudor;
   });
 }
 
@@ -160,44 +146,31 @@ export async function getDeudoresByCollection(collectionId: string): Promise<Deu
  * Elimina una colección y todos sus deudores
  */
 export async function deleteCollection(collectionId: string): Promise<void> {
+  // Primero obtener la colección y sus deudores para logging
+  const collection = await executeStoreOperation(STORES.DEUDORES_COLLECTIONS, 'readonly', store =>
+    store.get(collectionId),
+  );
+  const deudores = await getDeudoresByCollectionIds(collectionId);
+
   await withTransaction(
     [STORES.DEUDORES_COLLECTIONS, STORES.DEUDORES_DATA],
     'readwrite',
     async stores => {
       const [collectionsStore, dataStore] = stores as IDBObjectStore[];
 
-      // Obtener la colección para logging
-      const collection = await new Promise<DeudorCollection | undefined>((resolve, reject) => {
-        const req = collectionsStore.get(collectionId);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-
       // Eliminar metadata de la colección
       collectionsStore.delete(collectionId);
 
       // Eliminar todos los deudores de esta colección
-      const db = await openDB();
-      const index = db
-        .transaction(STORES.DEUDORES_DATA, 'readonly')
-        .objectStore(STORES.DEUDORES_DATA)
-        .index('cid'); // campo comprimido
-
-      const deudores = await new Promise<DeudorData[]>((resolve, reject) => {
-        const req = index.getAll(collectionId);
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-
       for (const deudor of deudores) {
         if (deudor.id !== undefined) {
           dataStore.delete(deudor.id);
         }
       }
-
-      console.log(`✓ Colección "${collection?.name}" eliminada con ${deudores.length} deudores`);
     },
   );
+
+  console.log(`✓ Colección "${collection?.name}" eliminada con ${deudores.length} deudores`);
 }
 
 /**
