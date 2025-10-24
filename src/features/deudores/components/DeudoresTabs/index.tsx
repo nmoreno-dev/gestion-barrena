@@ -64,7 +64,7 @@ export function DeudoresTabs({
               key={collection.id}
               role="tab"
               className={cn(
-                'tab h-12 font-semibold transition-all duration-150 border-primary border-b-3 bg-base-100 rounded-t-xl relative group',
+                'tab h-12 font-semibold transition-all duration-150 border-primary border-b-3 bg-base-100 rounded-t-xl relative group  px-3',
                 {
                   'tab-active text-primary border-primary shadow-lg border-b-6': isActive,
                   'hover:text-primary hover:scale-102 hover:shadow-md': !isActive,
@@ -72,7 +72,7 @@ export function DeudoresTabs({
               )}
             >
               {isEditing ? (
-                <div className="flex items-center gap-1 px-2">
+                <div className="flex items-center gap-2">
                   📊
                   <input
                     type="text"
@@ -92,9 +92,9 @@ export function DeudoresTabs({
                   </button>
                 </div>
               ) : (
-                <>
+                <div className="flex items-center gap-2">
                   <span
-                    className={cn('flex items-center gap-2 cursor-pointer px-3', {
+                    className={cn('flex items-center gap-2 cursor-pointer', {
                       'opacity-50': !isActive,
                     })}
                     onClick={() => onTabChange(collection.id)}
@@ -104,19 +104,23 @@ export function DeudoresTabs({
                     📊 {collection.name}
                   </span>
 
-                  {isActive && collection.totalRecords > 0 && (
+                  {isActive && (
                     <button
-                      className="btn btn-ghost btn-xs text-error opacity-60 hover:opacity-100 ml-2"
+                      className="btn btn-ghost btn-xs text-error opacity-60 hover:opacity-100 p-0"
                       onClick={e => {
                         e.stopPropagation();
                         onDeleteTab(collection.id);
                       }}
-                      title="Eliminar tabla y sus datos"
+                      title={
+                        collection.totalRecords > 0
+                          ? 'Eliminar tabla y sus datos'
+                          : 'Eliminar tabla vacía'
+                      }
                     >
                       <X size={14} />
                     </button>
                   )}
-                </>
+                </div>
               )}
             </div>
           );

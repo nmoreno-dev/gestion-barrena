@@ -37,7 +37,6 @@ function DeudoresPage() {
     hasData,
     loadDate: lastLoadDate,
     fileName,
-    isLoading: isLoadingDeudores,
   } = useCollectionInfo(currentCollectionId);
 
   const saveMutation = useSaveDeudoresToCollection();
@@ -101,23 +100,25 @@ function DeudoresPage() {
   const confirmDeleteCollection = () => {
     if (!collectionToDelete) return;
 
+    const isLastCollection = collections.length === 1;
+
     clearMutation.mutate(collectionToDelete, {
       onSuccess: () => {
         setShowDeleteModal(false);
         setCollectionToDelete(null);
 
-        // Si eliminamos la colección activa, seleccionar otra
-        if (collectionToDelete === currentCollectionId) {
+        if (isLastCollection) {
+          // Si era la última tabla, crear una nueva "Principal"
+          createMutation.mutate(DEFAULT_COLLECTION_NAME, {
+            onSuccess: collectionId => {
+              setCurrentCollectionId(collectionId);
+            },
+          });
+        } else if (collectionToDelete === currentCollectionId) {
+          // Si eliminamos la tabla activa, seleccionar otra
           const otherCollection = collections.find(c => c.id !== collectionToDelete);
           if (otherCollection) {
             setCurrentCollectionId(otherCollection.id);
-          } else if (collections.length === 1) {
-            // Era la última, crear una nueva
-            createMutation.mutate(DEFAULT_COLLECTION_NAME, {
-              onSuccess: collectionId => {
-                setCurrentCollectionId(collectionId);
-              },
-            });
           }
         }
       },
@@ -131,7 +132,7 @@ function DeudoresPage() {
     });
   };
 
-  if (isLoadingDeudores || isLoadingCollections) {
+  if (isLoadingCollections && !currentCollectionId) {
     return (
       <div className="container mx-auto p-4">
         <div className="card bg-base-100 shadow-xl">
@@ -154,33 +155,33 @@ function DeudoresPage() {
             <h2 className="card-title mb-4 md:mb-0 text-2xl">
               Gestión de Deudores {collection && `- ${collection.name}`}
             </h2>
-            {hasData && lastLoadDate && (
-              <div className="text-gray-500 wrap-anywhere text-right">
-                <div>
-                  <strong>Archivo:</strong> {fileName || 'Sin nombre'}
-                </div>
-                <div>
-                  <strong>Cargado:</strong>{' '}
-                  <span className="font-medium">{formatLoadDate(lastLoadDate)}</span>
-                </div>
-              </div>
-            )}
           </div>
 
           {!hasData ? (
             <CsvLoader onDataLoaded={handleDataLoaded} />
           ) : (
-            <div className="alert alert-info">
-              <div className="flex justify-between items-center w-full">
-                <div>
-                  <div className="wrap-anywhere">
-                    Tienes {deudores.length} registros cargados del archivo{' '}
-                    <strong>{fileName}</strong>. Para cargar un nuevo archivo, primero debes
-                    eliminar los datos actuales.
+            hasData &&
+            lastLoadDate && (
+              <div className="alert alert-info">
+                <div className="flex justify-between items-center w-full">
+                  <div>
+                    <div className="wrap-anywhere text-lg">
+                      <div>
+                        <strong>Archivo:</strong> {fileName || 'Sin nombre'}
+                      </div>
+                      <div>
+                        <strong>Cargado:</strong>
+                        <span> {formatLoadDate(lastLoadDate)}</span>
+                      </div>
+                      <div>
+                        <strong>Registros:</strong>
+                        <span> {deudores.length}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </div>
@@ -218,7 +219,7 @@ function DeudoresPage() {
               <div className="modal-box">
                 <h3 className="font-bold text-lg">⚠️ Confirmar eliminación de tabla</h3>
                 <p className="py-4">
-                  ¿Estás seguro de que quieres eliminar la tabla{' '}
+                  ¿Estás seguro de que quieres eliminar la tabla
                   <strong>{collectionData?.name}</strong> y todos sus datos?
                   <br />
                   <span className="text-warning font-medium">
@@ -233,10 +234,18 @@ function DeudoresPage() {
                       setShowDeleteModal(false);
                       setCollectionToDelete(null);
                     }}
+                    disabled={clearMutation.isPending}
                   >
                     Cancelar
                   </button>
-                  <button className="btn btn-error" onClick={confirmDeleteCollection}>
+                  <button
+                    className="btn btn-error"
+                    onClick={confirmDeleteCollection}
+                    disabled={clearMutation.isPending}
+                  >
+                    {clearMutation.isPending && (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    )}
                     Eliminar Tabla
                   </button>
                 </div>
