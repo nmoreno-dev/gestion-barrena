@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { DeudoresTabs, TablaDeudores } from '@/features/deudores/components';
+import { DeudoresTabs, CollectionTable } from '@/features/deudores/components';
 import CsvLoader from '@/features/deudores/components/CSVLoader';
 import { useState, useEffect, useRef } from 'react';
 import {
@@ -193,13 +193,17 @@ function DeudoresPage() {
         onDeleteTab={handleDeleteCollection}
         onRenameTab={handleRenameTab}
       >
-        <TablaDeudores
-          deudores={deudores}
-          plantillas={plantillas}
-          selectedPlantillaId={selectedPlantillaId}
-          onPlantillaChange={setSelectedPlantillaId}
-          isLoadingPlantillas={isLoadingPlantillas}
-        />
+        {collections.map(col => (
+          <CollectionTable
+            key={col.id}
+            collectionId={col.id}
+            isActive={col.id === currentCollectionId}
+            plantillas={plantillas}
+            selectedPlantillaId={selectedPlantillaId}
+            onPlantillaChange={setSelectedPlantillaId}
+            isLoadingPlantillas={isLoadingPlantillas}
+          />
+        ))}
       </DeudoresTabs>
 
       {/* Modal de confirmación para eliminar colección */}
