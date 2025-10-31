@@ -17,6 +17,7 @@ export interface CsvParseStats {
   errors: CsvRowError[];
   isComplete: boolean;
   progress: number;
+  syncMessage?: string; // Mensaje opcional para mostrar durante la sincronización
 }
 
 export interface CsvParseResult {
@@ -350,7 +351,27 @@ export function useCsvParser() {
             if (enrichWithGestiones && validData.length > 0) {
               try {
                 const { enrichDeudoresWithGestiones } = await import('../utils/gestionesSync');
-                enrichedData = await enrichDeudoresWithGestiones(validData);
+                enrichedData = await enrichDeudoresWithGestiones(validData, enrichProgress => {
+                  // Actualizar el progreso para mostrar la sincronización
+                  const syncMessage =
+                    enrichProgress.totalBatches > 1
+                      ? `Sincronizando batch ${enrichProgress.currentBatch} de ${enrichProgress.totalBatches}`
+                      : 'Sincronizando estados con el servidor';
+
+                  const syncStats: CsvParseStats = {
+                    ...finalStats,
+                    isComplete: false,
+                    progress: Math.round(enrichProgress.percentage),
+                    syncMessage,
+                  };
+
+                  setState(prev => ({
+                    ...prev,
+                    stats: syncStats,
+                  }));
+
+                  onProgress?.(syncStats);
+                });
               } catch (error) {
                 console.error('Error al enriquecer con gestiones:', error);
                 // Continuar con los datos sin enriquecer

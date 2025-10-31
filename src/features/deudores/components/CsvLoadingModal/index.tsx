@@ -56,8 +56,18 @@ const CsvLoadingModal = forwardRef<CsvLoadingModalRef, CsvLoadingModalProps>(
         return 'Iniciando carga...';
       }
 
+      // Si hay un mensaje de sincronización, mostrarlo
+      if (stats.syncMessage) {
+        return `🔄 ${stats.syncMessage}\nEsto puede tomar unos momentos...`;
+      }
+
+      // Si el parsing está completo pero el progreso no es 100%, estamos sincronizando
+      if (stats.validRows === stats.totalRows && stats.progress < 100 && !stats.isComplete) {
+        return '🔄 Sincronizando estados con el servidor...\nEsto puede tomar unos momentos.';
+      }
+
       if (stats.isComplete) {
-        return `Completado: ${stats.validRows} filas procesadas correctamente`;
+        return `✅ Completado: ${stats.validRows} filas procesadas correctamente`;
       }
 
       return `${message}\n      (${stats.validRows}/${stats.totalRows} filas procesadas)`;
