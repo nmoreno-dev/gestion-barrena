@@ -1,4 +1,4 @@
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useRef, useState } from 'react';
 import { Deudor } from '../../interfaces/deudor';
 import {
   Table,
@@ -10,6 +10,9 @@ import { toast } from '@/utils/toast';
 import { copyToClipboard } from '@/utils/clipboard';
 import { sendEmail, processPlantillaForDeudor, type PlantillaData } from '../../utils';
 import formatCuil from '@/utils/cuilFormater';
+import GestionModal, { type GestionModalRef } from '../GestionModal';
+import type { EstadoGestion } from '../../interfaces/gestion';
+import { useCreateGestion, useUpdateDeudorInCollection } from '../../queries';
 
 const copyMessageToClipboard = async (htmlString: string) => {
   try {
@@ -60,13 +63,22 @@ const TablaDeudores = memo(
     selectedPlantillaId,
     onPlantillaChange,
     isLoadingPlantillas = false,
+    onGestionChange,
+    collectionId,
   }: {
     deudores: Deudor[];
     plantillas?: PlantillaData[];
     selectedPlantillaId?: string | null;
     onPlantillaChange?: (id: string | null) => void;
     isLoadingPlantillas?: boolean;
+    onGestionChange?: (deudor: Deudor, estado: EstadoGestion, notas?: string) => void;
+    collectionId?: string;
   }) => {
+    const gestionModalRef = useRef<GestionModalRef>(null);
+    const createGestionMutation = useCreateGestion();
+    const updateDeudorMutation = useUpdateDeudorInCollection();
+    const [selectedDeudor, setSelectedDeudor] = useState<Deudor | null>(null);
+
     // Encontrar la plantilla seleccionada
     const selectedPlantilla = useMemo(
       () => (selectedPlantillaId ? plantillas.find(p => p.id === selectedPlantillaId) : null),
@@ -81,6 +93,59 @@ const TablaDeudores = memo(
     const handleCopyNumeroCredito = useCallback((value: string) => {
       copyCellValueToClipboard(value, 'N° Crédito');
     }, []);
+
+    // Handler para abrir modal de gestión
+    const handleOpenGestionModal = useCallback((deudor: Deudor) => {
+      setSelectedDeudor(deudor);
+      gestionModalRef.current?.open();
+    }, []);
+
+    // Handler para confirmar gestión
+    const handleConfirmGestion = useCallback(
+      (estado: EstadoGestion, notas?: string) => {
+        if (!selectedDeudor) return;
+
+        const timestamp = new Date().toISOString();
+
+        // Crear gestión en la API
+        createGestionMutation.mutate(
+          {
+            cuil: selectedDeudor.cuil,
+            nroCredito: selectedDeudor.numeroCredito,
+            estado,
+            notas,
+            monto: selectedDeudor.deudaActual,
+            colocador: selectedDeudor.acreedor.nombre,
+          },
+          {
+            onSuccess: () => {
+              toast.success('Gestión registrada correctamente', { duration: 3000 });
+
+              // Actualizar en IndexedDB si tenemos el collectionId
+              if (collectionId) {
+                updateDeudorMutation.mutate({
+                  collectionId,
+                  numeroCredito: selectedDeudor.numeroCredito,
+                  updates: {
+                    estadoGestion: estado,
+                    timestampGestion: timestamp,
+                    notasGestion: notas,
+                  },
+                });
+              }
+
+              // Notificar al componente padre si existe el callback
+              onGestionChange?.(selectedDeudor, estado, notas);
+            },
+            onError: error => {
+              console.error('Error al crear gestión:', error);
+              toast.error('Error al registrar la gestión', { duration: 4000 });
+            },
+          },
+        );
+      },
+      [selectedDeudor, createGestionMutation, updateDeudorMutation, collectionId, onGestionChange],
+    );
 
     // Crear columnas dinámicamente basadas en si hay plantilla seleccionada
     const columns: ColumnDef<Deudor>[] = useMemo(
@@ -120,9 +185,9 @@ const TablaDeudores = memo(
             <span
               className="underline cursor-pointer hover:text-success"
               title="Click para copiar N° Crédito"
-              onClick={() => handleCopyNumeroCredito(value.toString())}
+              onClick={() => handleCopyNumeroCredito(value?.toString() || '')}
             >
-              {value.toString()}
+              {value?.toString() || ''}
             </span>
           ),
         }),
@@ -148,9 +213,35 @@ const TablaDeudores = memo(
             </span>
           ),
         }),
+        createBasicColumn({
+          key: 'estadoGestion',
+          title: 'Estado',
+          width: 120,
+          align: 'center',
+          render: (value, deudor) => {
+            if (!value) {
+              return <span className="badge badge-ghost badge-sm">Sin gestionar</span>;
+            }
+            const badgeClass =
+              value === 'contactado'
+                ? 'badge-success'
+                : value === 'gestionado'
+                  ? 'badge-info'
+                  : 'badge-warning';
+            return (
+              <span className={`badge ${badgeClass} badge-sm`} title={deudor.notasGestion || ''}>
+                {value === 'contactado'
+                  ? 'Contactado'
+                  : value === 'gestionado'
+                    ? 'Gestionado'
+                    : 'Pendiente'}
+              </span>
+            );
+          },
+        }),
         createActionColumn({
           title: 'Acciones',
-          width: 120,
+          width: 150,
           render: deudor => {
             const handleSendEmail = () => {
               // Usar plantilla seleccionada o la primera disponible
@@ -193,6 +284,13 @@ const TablaDeudores = memo(
               <div className="flex gap-1">
                 <button
                   className="btn btn-ghost btn-xs text-xl"
+                  title="Gestionar"
+                  onClick={() => handleOpenGestionModal(deudor)}
+                >
+                  ✅
+                </button>
+                <button
+                  className="btn btn-ghost btn-xs text-xl"
                   title="Enviar Mail"
                   onClick={handleSendEmail}
                 >
@@ -210,7 +308,13 @@ const TablaDeudores = memo(
           },
         }),
       ],
-      [selectedPlantilla, plantillas, handleCopyCuil, handleCopyNumeroCredito],
+      [
+        selectedPlantilla,
+        plantillas,
+        handleCopyCuil,
+        handleCopyNumeroCredito,
+        handleOpenGestionModal,
+      ],
     );
 
     return (
@@ -269,6 +373,15 @@ const TablaDeudores = memo(
         )}
 
         <Table enableFiltering enablePagination enableSorting columns={columns} data={deudores} />
+
+        {/* Modal de gestión */}
+        <GestionModal
+          ref={gestionModalRef}
+          onConfirm={handleConfirmGestion}
+          currentEstado={selectedDeudor?.estadoGestion}
+          currentNotas={selectedDeudor?.notasGestion}
+          deudorNombre={selectedDeudor?.nombre}
+        />
       </>
     );
   },

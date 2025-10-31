@@ -234,3 +234,35 @@ export async function reorderCollections(collectionIds: string[]): Promise<void>
     }
   });
 }
+
+/**
+ * Actualiza un deudor específico en una colección
+ */
+export async function updateDeudorInCollection(
+  collectionId: string,
+  numeroCredito: string,
+  updates: Partial<Deudor>,
+): Promise<void> {
+  const allDeudores = await getDeudoresByCollectionIds(collectionId);
+
+  // Buscar el deudor por número de crédito
+  const deudorData = allDeudores.find((d: DeudorData) => d.numeroCredito === numeroCredito);
+
+  if (!deudorData || deudorData.id === undefined) {
+    throw new Error(
+      `Deudor con número de crédito ${numeroCredito} no encontrado en colección ${collectionId}`,
+    );
+  }
+
+  // Actualizar el deudor con los nuevos datos
+  const updatedDeudor: DeudorData = {
+    ...deudorData,
+    ...updates,
+  };
+
+  await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store => store.put(updatedDeudor));
+
+  console.log(
+    `✓ Deudor con nro. crédito ${numeroCredito} actualizado en colección ${collectionId}`,
+  );
+}

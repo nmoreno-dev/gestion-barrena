@@ -8,9 +8,15 @@ interface CsvLoaderProps {
   onDataLoaded: (data: Deudor[], fileName: string) => void; // callback para devolver los datos parseados
   onStatsUpdate?: (stats: CsvParseStats) => void; // callback opcional para estadísticas de progreso
   onError?: (error: string) => void; // callback opcional para manejo de errores
+  enrichWithGestiones?: boolean; // Si true, consulta la API para recuperar gestiones previas
 }
 
-const CsvLoader: React.FC<CsvLoaderProps> = ({ onDataLoaded, onStatsUpdate, onError }) => {
+const CsvLoader: React.FC<CsvLoaderProps> = ({
+  onDataLoaded,
+  onStatsUpdate,
+  onError,
+  enrichWithGestiones = true,
+}) => {
   const [fileName, setFileName] = useState<string | null>(null);
   const { error, stats, isLoading, parseFile, resetState, cancelParsing } = useCsvParser();
   const { modalRef, showModal, closeModal } = useCsvLoadingModal();
@@ -29,9 +35,14 @@ const CsvLoader: React.FC<CsvLoaderProps> = ({ onDataLoaded, onStatsUpdate, onEr
     resetState();
 
     try {
-      const result = await parseFile(file, progressStats => {
-        onStatsUpdate?.(progressStats);
-      });
+      const result = await parseFile(
+        file,
+        progressStats => {
+          onStatsUpdate?.(progressStats);
+        },
+        undefined,
+        enrichWithGestiones,
+      );
 
       onDataLoaded(result.data, file.name);
       onStatsUpdate?.(result.stats);

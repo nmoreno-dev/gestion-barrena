@@ -222,6 +222,7 @@ export function useCsvParser() {
       file: File,
       onProgress?: (stats: CsvParseStats) => void,
       onRowParsed?: (deudor: Deudor, rowIndex: number) => void,
+      enrichWithGestiones?: boolean,
     ): Promise<CsvParseResult> => {
       return new Promise((resolve, reject) => {
         // Cancelar parsing anterior si existe
@@ -329,7 +330,7 @@ export function useCsvParser() {
             onProgress?.(currentStats);
           },
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          complete: _ => {
+          complete: async _ => {
             if (abortControllerRef.current?.signal.aborted) {
               reject(new Error('Parsing was cancelled'));
               return;
@@ -344,17 +345,29 @@ export function useCsvParser() {
               progress: 100,
             };
 
+            // Enriquecer con gestiones si se solicitó
+            let enrichedData = validData;
+            if (enrichWithGestiones && validData.length > 0) {
+              try {
+                const { enrichDeudoresWithGestiones } = await import('../utils/gestionesSync');
+                enrichedData = await enrichDeudoresWithGestiones(validData);
+              } catch (error) {
+                console.error('Error al enriquecer con gestiones:', error);
+                // Continuar con los datos sin enriquecer
+              }
+            }
+
             setState(prev => ({
               ...prev,
               isLoading: false,
               stats: finalStats,
-              validData,
+              validData: enrichedData,
             }));
 
             onProgress?.(finalStats);
 
             resolve({
-              data: validData,
+              data: enrichedData,
               stats: finalStats,
             });
           },
