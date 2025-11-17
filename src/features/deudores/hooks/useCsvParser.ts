@@ -4,6 +4,7 @@ import type { Deudor } from '../interfaces/deudor';
 import { validateAndParseRow } from '../utils/csvValidators';
 import { mapRowToRecord } from '../utils/csvTransformers';
 import { PAPA_PARSE_CONFIG, MIN_COLUMNS } from '../utils/csvConstants';
+import { useCsvEnrichment } from './useCsvEnrichment';
 
 export interface CsvRowError {
   row: number;
@@ -50,6 +51,7 @@ export function useCsvParser() {
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { enrichWithGestiones: enrichDeudores } = useCsvEnrichment();
 
   const parseFile = useCallback(
     async (
@@ -168,33 +170,10 @@ export function useCsvParser() {
             // Enriquecer con gestiones si se solicitó
             let enrichedData = validData;
             if (enrichWithGestiones && validData.length > 0) {
-              try {
-                const { enrichDeudoresWithGestiones } = await import('../utils/gestionesSync');
-                enrichedData = await enrichDeudoresWithGestiones(validData, enrichProgress => {
-                  // Actualizar el progreso para mostrar la sincronización
-                  const syncMessage =
-                    enrichProgress.totalBatches > 1
-                      ? `Sincronizando batch ${enrichProgress.currentBatch} de ${enrichProgress.totalBatches}`
-                      : 'Sincronizando estados con el servidor';
-
-                  const syncStats: CsvParseStats = {
-                    ...finalStats,
-                    isComplete: false,
-                    progress: Math.round(enrichProgress.percentage),
-                    syncMessage,
-                  };
-
-                  setState(prev => ({
-                    ...prev,
-                    stats: syncStats,
-                  }));
-
-                  onProgress?.(syncStats);
-                });
-              } catch (error) {
-                console.error('Error al enriquecer con gestiones:', error);
-                // Continuar con los datos sin enriquecer
-              }
+              enrichedData = await enrichDeudores(validData, {
+                onProgress,
+                finalStats,
+              });
             }
 
             setState(prev => ({
