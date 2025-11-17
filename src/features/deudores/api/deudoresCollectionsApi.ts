@@ -304,9 +304,11 @@ export async function batchUpdateDeudoresInCollection(
 
   // Ejecutar todas las actualizaciones en una sola transacción
   if (toUpdate.length > 0) {
-    await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store => {
+    await withTransaction(STORES.DEUDORES_DATA, 'readwrite', async store => {
+      const dataStore = store as IDBObjectStore;
+
       for (const deudor of toUpdate) {
-        store.put(deudor);
+        dataStore.put(deudor);
       }
     });
   }
