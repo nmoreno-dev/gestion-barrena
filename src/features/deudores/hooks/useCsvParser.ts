@@ -1,7 +1,9 @@
 import { useState, useCallback, useRef } from 'react';
 import Papa from 'papaparse';
-import { ACREEDORES } from '../interfaces/acreedor';
 import type { Deudor } from '../interfaces/deudor';
+import { validateAndParseRow } from '../utils/csvValidators';
+import { mapRowToRecord } from '../utils/csvTransformers';
+import { PAPA_PARSE_CONFIG, MIN_COLUMNS } from '../utils/csvConstants';
 
 export interface CsvRowError {
   row: number;
@@ -32,17 +34,6 @@ interface CsvParserState {
   validData: Deudor[];
 }
 
-const REQUIRED_FIELDS = [
-  'CUIL',
-  'TITULAR',
-  'MAIL',
-  'TELEFONO',
-  'COLOCADOR',
-  'DEUDA ACTUAL',
-  'DEUDA CANCELATORIA',
-  'N° DE CRÉDITO',
-] as const;
-
 export function useCsvParser() {
   const [state, setState] = useState<CsvParserState>({
     isLoading: false,
@@ -59,164 +50,6 @@ export function useCsvParser() {
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  function parseMonto(valor: string): number {
-    if (!valor) return 0;
-
-    return (
-      parseFloat(
-        valor
-          .replace(/[^\d,.-]/g, '') // elimina $, espacios y otros símbolos
-          .replace(/,/g, ''), // quita separador de miles
-      ) || 0
-    );
-  }
-
-  const validateCuil = (cuil: string): boolean => {
-    const cleanCuil = cuil.replace(/[^\d]/g, '');
-    return cleanCuil.length === 11;
-  };
-
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const validatePhone = (phone: string): boolean => {
-    const cleanPhone = phone.replace(/[^\d]/g, '');
-    return cleanPhone.length >= 8;
-  };
-
-  const findAcreedor = (colocadorId: string) => {
-    const normalizedName = colocadorId.toUpperCase().trim();
-
-    // // Mapeo específico para los nombres comunes en los datos
-    // if (normalizedName.includes('SANJORGE') || normalizedName === 'SANJORGE') {
-    //   return ACREEDORES.find(a => a.nombre === 'ADELANTOS PAY SA.') || ACREEDORES[1]; // SAN_JORGE
-    // }
-
-    // if (normalizedName.includes('CEFERINO') || normalizedName === 'CEFERINO') {
-    //   return ACREEDORES.find(a => a.nombre === 'CREDIPLAT S.A.') || ACREEDORES[0]; // CEFERINO
-    // }
-
-    // Búsqueda general por nombre
-    const foundAcreedor = ACREEDORES.find(
-      acreedor =>
-        acreedor.id.toUpperCase().includes(normalizedName) ||
-        normalizedName.includes(acreedor.id.toUpperCase()),
-    );
-
-    return foundAcreedor || ACREEDORES[0]; // Default al primero si no encuentra
-  };
-
-  const validateAndParseRow = (
-    rawRow: Record<string, string>,
-    rowIndex: number,
-  ): {
-    data: Deudor | null;
-    errors: CsvRowError[];
-  } => {
-    const errors: CsvRowError[] = [];
-
-    // Verificar campos requeridos
-    for (const field of REQUIRED_FIELDS) {
-      if (!rawRow[field] || String(rawRow[field]).trim() === '') {
-        errors.push({
-          row: rowIndex,
-          field,
-          value: rawRow[field],
-          message: `Campo requerido '${field}' está vacío o faltante`,
-        });
-      }
-    }
-
-    if (errors.length > 0) {
-      return { data: null, errors };
-    }
-
-    try {
-      const cuil = String(rawRow['CUIL']).trim();
-      const email = String(rawRow['MAIL']).trim();
-      const telefono = String(rawRow['TELEFONO']).trim();
-      const colocador = String(rawRow['COLOCADOR']).trim();
-
-      // Validaciones específicas
-      if (!validateCuil(cuil)) {
-        errors.push({
-          row: rowIndex,
-          field: 'CUIL',
-          value: cuil,
-          message: 'CUIL debe tener 11 dígitos',
-        });
-      }
-
-      if (!validateEmail(email)) {
-        errors.push({
-          row: rowIndex,
-          field: 'MAIL',
-          value: email,
-          message: 'Email no tiene formato válido',
-        });
-      }
-
-      if (!validatePhone(telefono)) {
-        errors.push({
-          row: rowIndex,
-          field: 'TELEFONO',
-          value: telefono,
-          message: 'Teléfono debe tener al menos 8 dígitos',
-        });
-      }
-
-      const deudaActual = parseMonto(rawRow['DEUDA ACTUAL']);
-      const deudaCancelatoria = parseMonto(rawRow['DEUDA CANCELATORIA']);
-      const numeroCredito = String(rawRow['N° DE CRÉDITO']).replace(/\D/g, '');
-
-      if (isNaN(deudaActual) || deudaActual <= 0) {
-        errors.push({
-          row: rowIndex,
-          field: 'DEUDA ACTUAL',
-          value: rawRow['DEUDA ACTUAL'],
-          message: 'Deuda actual debe ser un número positivo',
-        });
-      }
-
-      if (isNaN(deudaCancelatoria) || deudaCancelatoria <= 0) {
-        errors.push({
-          row: rowIndex,
-          field: 'DEUDA CANCELATORIA',
-          value: rawRow['DEUDA CANCELATORIA'],
-          message: 'Deuda cancelatoria debe ser un número positivo',
-        });
-      }
-
-      if (errors.length > 0) {
-        return { data: null, errors };
-      }
-
-      // Crear objeto Deudor
-      const deudor: Deudor = {
-        cuil: cuil.replace(/[^\d]/g, ''),
-        nombre: String(rawRow['TITULAR']).trim(),
-        email,
-        telefono,
-        acreedor: findAcreedor(colocador),
-        numeroCredito, // Mantener como number simple
-        deudaActual,
-        deudaCancelatoria,
-      };
-
-      return { data: deudor, errors: [] };
-    } catch (error) {
-      errors.push({
-        row: rowIndex,
-        field: 'GENERAL',
-        value: rawRow,
-        message: `Error inesperado al procesar fila: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-      });
-      return { data: null, errors };
-    }
-  };
 
   const parseFile = useCallback(
     async (
@@ -255,12 +88,7 @@ export function useCsvParser() {
         let invalidRows = 0;
 
         Papa.parse(file, {
-          header: false,
-          skipEmptyLines: 'greedy',
-          delimiter: '', // autodetecta (, ; \t)
-          dynamicTyping: false,
-          worker: true, // Usar Web Worker para no bloquear la UI
-          chunkSize: 1024 * 10, // 1KB chunks para mejor control de progreso
+          ...PAPA_PARSE_CONFIG,
           chunk: (results: Papa.ParseResult<string[]>) => {
             if (abortControllerRef.current?.signal.aborted) return;
 
@@ -269,7 +97,7 @@ export function useCsvParser() {
 
             rows.forEach((row, i) => {
               // validá cantidad de columnas
-              if (!row || row.length < 8) {
+              if (!row || row.length < MIN_COLUMNS) {
                 invalidRows++;
                 allErrors.push({
                   row: totalRows + i + 1,
@@ -281,16 +109,7 @@ export function useCsvParser() {
               }
 
               // mapeo manual por índice (orden según tu CSV)
-              const rawRow = {
-                CUIL: row[0],
-                TITULAR: row[1],
-                MAIL: row[2],
-                TELEFONO: row[3],
-                COLOCADOR: row[4],
-                'DEUDA ACTUAL': row[5],
-                'DEUDA CANCELATORIA': row[6],
-                'N° DE CRÉDITO': row[7],
-              } as Record<string, string>;
+              const rawRow = mapRowToRecord(row);
 
               const rowIndex = totalRows + i + 1; // 1-based para UI
               const { data, errors } = validateAndParseRow(rawRow, rowIndex);
