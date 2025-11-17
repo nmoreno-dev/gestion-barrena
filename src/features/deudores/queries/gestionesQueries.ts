@@ -19,14 +19,20 @@ export const gestionesKeys = {
 
 /**
  * Hook para consultar el estado en batch de múltiples créditos
- * Se ejecuta solo cuando se proporciona un array válido de créditos
+ * Por defecto está deshabilitado para uso manual con refetch()
+ * @param nrosCredito - Array de números de crédito a consultar
+ * @param options - Opciones adicionales de React Query (ej: enabled, refetchInterval, etc)
  */
-export const useBatchStatus = (nrosCredito: string[]) => {
+export const useBatchStatus = (
+  nrosCredito: string[],
+  options?: {
+    enabled?: boolean;
+  },
+) => {
   return useQuery({
     queryKey: gestionesKeys.batchStatus(nrosCredito),
     queryFn: () => batchStatus(nrosCredito),
-    enabled: nrosCredito.length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    enabled: options?.enabled ?? false,
   });
 };
 

@@ -266,3 +266,55 @@ export async function updateDeudorInCollection(
     `✓ Deudor con nro. crédito ${numeroCredito} actualizado en colección ${collectionId}`,
   );
 }
+
+/**
+ * Actualiza múltiples deudores en batch en una colección
+ * Mucho más eficiente que llamar updateDeudorInCollection múltiples veces
+ */
+export async function batchUpdateDeudoresInCollection(
+  collectionId: string,
+  updates: Array<{ numeroCredito: string; updates: Partial<Deudor> }>,
+): Promise<{ updated: number; notFound: string[] }> {
+  const allDeudores = await getDeudoresByCollectionIds(collectionId);
+
+  // Crear un mapa para búsqueda rápida
+  const deudoresMap = new Map<string, DeudorData>();
+  for (const deudor of allDeudores) {
+    if (deudor.id !== undefined) {
+      deudoresMap.set(deudor.numeroCredito, deudor);
+    }
+  }
+
+  const toUpdate: DeudorData[] = [];
+  const notFound: string[] = [];
+
+  // Preparar actualizaciones
+  for (const { numeroCredito, updates: updateData } of updates) {
+    const deudorData = deudoresMap.get(numeroCredito);
+
+    if (deudorData) {
+      toUpdate.push({
+        ...deudorData,
+        ...updateData,
+      });
+    } else {
+      notFound.push(numeroCredito);
+    }
+  }
+
+  // Ejecutar todas las actualizaciones en una sola transacción
+  if (toUpdate.length > 0) {
+    await executeStoreOperation(STORES.DEUDORES_DATA, 'readwrite', store => {
+      for (const deudor of toUpdate) {
+        store.put(deudor);
+      }
+    });
+  }
+
+  console.log(`✓ ${toUpdate.length} deudores actualizados en batch en colección ${collectionId}`);
+
+  return {
+    updated: toUpdate.length,
+    notFound,
+  };
+}
