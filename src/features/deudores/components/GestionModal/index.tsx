@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react';
 import { Modal, type ModalRef } from '@/common/components';
 import type { EstadoGestion } from '../../interfaces/gestion';
 
@@ -25,24 +25,47 @@ const GestionModal = forwardRef<GestionModalRef, GestionModalProps>(
     const modalRef = useRef<ModalRef>(null);
     const [estado, setEstado] = useState<EstadoGestion>(currentEstado || 'pendiente');
     const [notas, setNotas] = useState(currentNotas || '');
+    const [isOpen, setIsOpen] = useState(false);
 
+    // Generar ID único para esta instancia de modal
+    const uniqueId = useMemo(
+      () => `gestion-modal-${Math.random().toString(36).substring(2, 9)}`,
+      [],
+    );
+    const uniqueRadioName = useMemo(() => `estado-${uniqueId}`, [uniqueId]);
+
+    // Solo actualizar el estado cuando la modal se abre (no en cada prop change)
     useEffect(() => {
-      if (currentEstado) setEstado(currentEstado);
-      if (currentNotas) setNotas(currentNotas);
-    }, [currentEstado, currentNotas]);
+      if (isOpen) {
+        setEstado(currentEstado || 'pendiente');
+        setNotas(currentNotas || '');
+      }
+    }, [isOpen, currentEstado, currentNotas]);
 
     useImperativeHandle(ref, () => ({
-      open: () => modalRef.current?.showModal(),
-      close: () => modalRef.current?.close(),
+      open: () => {
+        setIsOpen(true);
+        modalRef.current?.showModal();
+      },
+      close: () => {
+        setIsOpen(false);
+        modalRef.current?.close();
+      },
     }));
 
     const handleConfirm = () => {
       onConfirm(estado, notas.trim() || undefined);
+      setIsOpen(false);
+      modalRef.current?.close();
+    };
+
+    const handleClose = () => {
+      setIsOpen(false);
       modalRef.current?.close();
     };
 
     return (
-      <Modal id="gestion-modal" ref={modalRef} title="Gestionar Crédito">
+      <Modal id={uniqueId} ref={modalRef} title="Gestionar Crédito">
         <div className="space-y-4">
           {/* Información del deudor */}
           <div className="alert alert-info">
@@ -72,7 +95,7 @@ const GestionModal = forwardRef<GestionModalRef, GestionModalProps>(
                 <label key={e.value} className="label cursor-pointer gap-2 flex-1 min-w-[120px]">
                   <input
                     type="radio"
-                    name="estado"
+                    name={uniqueRadioName}
                     className="radio radio-primary"
                     checked={estado === e.value}
                     onChange={() => setEstado(e.value)}
@@ -102,11 +125,7 @@ const GestionModal = forwardRef<GestionModalRef, GestionModalProps>(
 
           {/* Botones de acción */}
           <div className="flex gap-2 justify-end pt-4">
-            <button
-              className="btn btn-ghost"
-              onClick={() => modalRef.current?.close()}
-              type="button"
-            >
+            <button className="btn btn-ghost" onClick={handleClose} type="button">
               Cancelar
             </button>
             <button className="btn btn-primary" onClick={handleConfirm} type="button">
