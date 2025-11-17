@@ -219,9 +219,6 @@ const TablaDeudores = memo(
           width: 120,
           align: 'center',
           render: (value, deudor) => {
-            if (!value) {
-              return <span className="badge badge-ghost badge-sm">Sin gestionar</span>;
-            }
             const badgeClass =
               value === 'contactado'
                 ? 'badge-success'
