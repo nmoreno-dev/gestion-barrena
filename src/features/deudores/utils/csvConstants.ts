@@ -23,8 +23,8 @@ export const PAPA_PARSE_CONFIG: Partial<Papa.ParseConfig> = {
   skipEmptyLines: 'greedy',
   delimiter: '', // autodetecta (, ; \t)
   dynamicTyping: false,
-  worker: true, // Usar Web Worker para no bloquear la UI
-  chunkSize: 1024 * 10, // 10KB chunks para mejor control de progreso
+  // worker: true, // Web Workers no están tipados en @types/papaparse v5.3.16
+  // chunkSize: 1024 * 10, // chunkSize tampoco está tipado en @types/papaparse v5.3.16
 };
 
 /**
