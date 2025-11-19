@@ -1,3 +1,20 @@
+# [1.4.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.3.0...v1.4.0) (2025-11-19)
+
+### Bug Fixes
+
+- comment out Web Worker and chunkSize options in PapaParse config due to typing issues ([d4bc176](https://github.com/nmoreno-dev/gestion-barrena/commit/d4bc1760aa47e508cb64c714215ff8614cc5d650))
+- replace store operation with transaction handling in batch update function ([8ffa1ba](https://github.com/nmoreno-dev/gestion-barrena/commit/8ffa1bad4cc67b0ac4b9af995ecf0def76698a45))
+- update development API URL and port in configuration files ([98cf9a2](https://github.com/nmoreno-dev/gestion-barrena/commit/98cf9a29243cc80d093ad53620c4ba39599b3fee))
+
+### Features
+
+- add useCsvEnrichment hook for debtor enrichment and integrate with useCsvParser ([9c9b9c9](https://github.com/nmoreno-dev/gestion-barrena/commit/9c9b9c959bc286ec3033d6adc58f5a236b5f810a))
+- enhance CsvLoadingModal and useCsvParser for improved ([f9fb08f](https://github.com/nmoreno-dev/gestion-barrena/commit/f9fb08f47b42c7a8f8a9e22dc13ab31f1ce0f0f0))
+- enhance GestionModal with unique ID generation and improved state management ([2ada7ea](https://github.com/nmoreno-dev/gestion-barrena/commit/2ada7ea780d507020386f0fdb6a8761cb8e54b08))
+- implement batch update for debtors in collection and add manual sync functionality ([2ac19b3](https://github.com/nmoreno-dev/gestion-barrena/commit/2ac19b3d099eb288f1cbb0504a43a71a5a3b1366))
+- implement gestion management features including CRUD operations and UI components ([604a448](https://github.com/nmoreno-dev/gestion-barrena/commit/604a4486f62587942631e3ae214fe80436056b27))
+- refactor CSV parsing logic and validation ([3026124](https://github.com/nmoreno-dev/gestion-barrena/commit/3026124077a9ce13215062fb7e8ff2522e541bf0))
+
 # [1.3.0](https://github.com/nmoreno-dev/gestion-barrena/compare/v1.2.0...v1.3.0) (2025-10-24)
 
 ### Bug Fixes
