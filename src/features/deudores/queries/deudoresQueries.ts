@@ -183,6 +183,38 @@ export function useUpdateCollectionColor() {
   });
 }
 
+/**
+ * Hook para actualizar un deudor específico en una colección
+ */
+export function useUpdateDeudorInCollection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      collectionId,
+      numeroCredito,
+      updates,
+    }: {
+      collectionId: string;
+      numeroCredito: string;
+      updates: Partial<Deudor>;
+    }) => {
+      const { updateDeudorInCollection } = await import('../api/deudoresCollectionsApi');
+      return updateDeudorInCollection(collectionId, numeroCredito, updates);
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidar queries relacionadas para refrescar los datos
+      queryClient.invalidateQueries({
+        queryKey: deudoresQueryKeys.collectionData(variables.collectionId),
+      });
+    },
+    onError: (error: Error) => {
+      console.error('Error al actualizar deudor:', error);
+      toast.error(`Error al actualizar deudor: ${error.message}`);
+    },
+  });
+}
+
 // ===== HELPERS =====
 
 /**

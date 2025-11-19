@@ -4,3 +4,5 @@ export { default as TablaDeudores } from './TablaDeudores';
 export { DeudoresTabs } from './DeudoresTabs';
 export { default as CollectionTable } from './CollectionTable';
 export { ColorPickerModal } from './ColorPickerModal';
+export { default as GestionModal } from './GestionModal';
+export type { GestionModalRef } from './GestionModal';

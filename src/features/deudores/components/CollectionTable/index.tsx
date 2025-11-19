@@ -30,6 +30,7 @@ const CollectionTable = memo(
           selectedPlantillaId={selectedPlantillaId}
           onPlantillaChange={onPlantillaChange}
           isLoadingPlantillas={isLoadingPlantillas}
+          collectionId={collectionId}
         />
       </div>
     );
