@@ -49,7 +49,8 @@ const inputStyles = cva(
 );
 
 interface TextFieldProps
-  extends Omit<
+  extends
+    Omit<
       InputHTMLAttributes<HTMLInputElement>,
       'value' | 'onChange' | 'onBlur' | 'prefix' | 'size'
     >,
