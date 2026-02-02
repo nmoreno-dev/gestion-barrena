@@ -44,8 +44,8 @@ const PlantillasEditarSlugRoute = PlantillasEditarSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/plantillas/crear': typeof PlantillasCrearRoute
-  '/deudores': typeof DeudoresIndexRoute
-  '/plantillas': typeof PlantillasIndexRoute
+  '/deudores/': typeof DeudoresIndexRoute
+  '/plantillas/': typeof PlantillasIndexRoute
   '/plantillas/editar/$slug': typeof PlantillasEditarSlugRoute
 }
 export interface FileRoutesByTo {
@@ -68,8 +68,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/plantillas/crear'
-    | '/deudores'
-    | '/plantillas'
+    | '/deudores/'
+    | '/plantillas/'
     | '/plantillas/editar/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -107,14 +107,14 @@ declare module '@tanstack/react-router' {
     '/plantillas/': {
       id: '/plantillas/'
       path: '/plantillas'
-      fullPath: '/plantillas'
+      fullPath: '/plantillas/'
       preLoaderRoute: typeof PlantillasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/deudores/': {
       id: '/deudores/'
       path: '/deudores'
-      fullPath: '/deudores'
+      fullPath: '/deudores/'
       preLoaderRoute: typeof DeudoresIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

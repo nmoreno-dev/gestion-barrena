@@ -3,6 +3,7 @@ export enum Banco {
   BANCO_INDUSTRIAL = 'BANCO INDUSTRIAL S.A.',
   BANCO_SANTANDER = 'SANTANDER',
   PATAGONIA = 'PATAGONIA',
+  CERSIUM = 'CERSIUM S.A.',
 }
 
 export interface Acreedor {
@@ -12,7 +13,7 @@ export interface Acreedor {
   banco: Banco; // banco del acreedor
   nombreCortoBanco: string; // nombre corto del banco, ej: 'BBVA'
   cuit: number | string; // CUIT del acreedor
-  numeroCuenta: string; // número de cuenta del acreedor
+  numeroCuenta?: string; // número de cuenta del acreedor (opcional)
   alias: string; // alias de la cuenta del acreedor
   CBU: string; // CBU de la cuenta del acreedor
   titular?: string; // titular de la cuenta del acreedor
@@ -34,14 +35,13 @@ const CEFERINO: Acreedor = {
 const SAN_JORGE: Acreedor = {
   id: 'sanjorge',
   nombre: 'SAN JORGE',
-  nombreEmpresa: 'ADELANTOS PAY S.A.',
-  banco: Banco.BANCO_INDUSTRIAL,
-  nombreCortoBanco: 'INDUSTRIAL',
-  cuit: '30718438906',
+  nombreEmpresa: 'MILENIO EDICIONES S.A.',
+  banco: Banco.CERSIUM,
+  nombreCortoBanco: 'CERSIUM',
+  cuit: '30-70543429-4',
   numeroCuenta: '1-5020320/1',
-  alias: 'ADELANTOSPAY',
-  CBU: '3220001805050203200010',
-  titular: 'ADELANTOS PAY S.A.',
+  alias: 'ADELANTO.SANJORGE',
+  CBU: '0000335100000000196240',
   tipoCuenta: 'CUENTA CORRIENTE',
 };
 
@@ -60,12 +60,12 @@ const IXPAY: Acreedor = {
 const ONCE_DE_JULIO: Acreedor = {
   id: '11dejulio',
   nombre: 'ONCE DE JULIO',
-  nombreEmpresa: 'EDUCAX S.A.',
-  banco: Banco.PATAGONIA,
-  nombreCortoBanco: 'PATAGONIA',
-  cuit: '30-71810511-7',
+  nombreEmpresa: 'MILENIO EDICIONES S.A.',
+  banco: Banco.CERSIUM,
+  nombreCortoBanco: 'CERSIUM',
+  cuit: '30-70543429-4',
   numeroCuenta: '010-100766315-000',
-  alias: 'CALCULAR.SUMAN.ABACO',
-  CBU: '0340010400100766315009',
+  alias: 'ADELANTO.11DEJULIO',
+  CBU: '0000335100000000196257',
 };
 export const ACREEDORES: Acreedor[] = [CEFERINO, SAN_JORGE, IXPAY, ONCE_DE_JULIO];

@@ -52,7 +52,7 @@ export function processPlantillaForDeudor(
       .replaceAll('[ACREEDOR_BANCO]', deudor.acreedor.banco)
       .replaceAll('[ACREEDOR_NOMBRE_EMPRESA]', deudor.acreedor.nombreEmpresa)
       .replaceAll('[ACREEDOR_CUIT]', deudor.acreedor.cuit.toString())
-      .replaceAll('[ACREEDOR_CUENTA]', deudor.acreedor.numeroCuenta.toString())
+      .replaceAll('[ACREEDOR_CUENTA]', deudor.acreedor.numeroCuenta?.toString() ?? '')
       .replaceAll('[ACREEDOR_ALIAS]', deudor.acreedor.alias)
       .replaceAll('[ACREEDOR_CBU]', deudor.acreedor.CBU.toString())
       .replaceAll(
