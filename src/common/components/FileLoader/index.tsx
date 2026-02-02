@@ -12,8 +12,10 @@ type FileInputColor =
   | 'warning'
   | 'error';
 
-interface FileLoaderProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type' | 'size'> {
+interface FileLoaderProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'type' | 'size'
+> {
   size?: FileInputSize;
   color?: FileInputColor;
   ghost?: boolean;

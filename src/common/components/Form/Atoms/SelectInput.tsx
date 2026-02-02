@@ -80,7 +80,8 @@ export interface SelectFieldOption {
 }
 
 export interface SelectFieldProps
-  extends Omit<
+  extends
+    Omit<
       SelectHTMLAttributes<HTMLSelectElement>,
       // We override value/onChange/onBlur to drive them from our field context
       'value' | 'onChange' | 'onBlur' | 'prefix' | 'size'

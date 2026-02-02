@@ -91,6 +91,7 @@ function Table<TData>({
     getPaginationRowModel: enablePagination ? getPaginationRowModel() : undefined,
     enableRowSelection,
     enableColumnPinning,
+    autoResetPageIndex: false,
   });
 
   // Handle row selection callback
